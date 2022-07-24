@@ -33,7 +33,7 @@ class EstateProperty(models.Model):
         'res.partner', string='Buyer', index=True, tracking=10,copy=False,
         help="Linked partner. You can find a partner by its Name, TIN, Email or Internal Reference.")
     tag=fields.Many2many("estate.tag",string="Tags")
-    offers=fields.One2many("estate.offer","property_id",string="offers")
+    offer_ids=fields.One2many("estate.offer","property_id",string="offers")
 
 
 class EstatePropertyType(models.Model):
@@ -50,6 +50,7 @@ class EstatePropertyTag(models.Model):
 class EstatePropertyOffer(models.Model):
     _name="estate.offer"
     _description="An offer to a property"
+    price=fields.Float(required=True,string="Offered Price")
     Status=fields.Selection(string="Status",
         selection=[("accepted","Accepted"),("refused","Refused")],
         help="The status of the offer")
