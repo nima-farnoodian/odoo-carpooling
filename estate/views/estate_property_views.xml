@@ -25,6 +25,9 @@
                 <field name="garden_orientation"/>
                 <field name="active"/>
                 <field name="Status"/>
+                <field name="type"/>
+                <field name="salesperson"/>
+                <field name="buyer"/>
             </tree>
         </field>
     </record>
@@ -51,6 +54,7 @@
                         <notebook  colspan="4">
                             <page string="Description">
                                 <group>
+                                    <field name="name"/>
                                     <field name="description"/>
                                     <field name="bedrooms"/>
                                     <field name="living_area"/>
@@ -60,8 +64,20 @@
                                     <field name="garden_area"/>
                                     <field name="garden_orientation"/>
                                     <field name="Status"/>
+                                    <field name="type"/>
                                 </group>
            
+                            </page>
+                            <page string="Other Info">
+                                <group>
+                                    <field name="salesperson"/>
+                                    <field name="buyer"/>
+                                </group>
+                            </page>
+                            <page string="Tags">
+                                <group>
+                                    <field name="tag"/>
+                                </group>
                             </page>
                         </notebook>
                     </group>
@@ -83,6 +99,9 @@
                     <field name="bedrooms" />
                     <field name="living_area" />
                     <field name="facades"/>
+                    <field name="type"/>
+                    <field name="salesperson"/>
+                    <field name="buyer"/>
                     <separator/>
                     <filter string="Available" name='availability' domain="[('Status','=','New')]"/>
                     <filter string="Many Bedrooms" name='manyBeds' domain="[('bedrooms','>',2)]"/>
