@@ -43,6 +43,7 @@ class EstateProperty(models.Model):
 
     best_price=fields.Float(compute="_get_best_price",store=True,string="Best Offer Price")
 
+
     @api.depends("offer_ids")
     def _get_best_price(self):
         for record in self:
@@ -82,6 +83,14 @@ class EstateProperty(models.Model):
             else:
                 record.Status="canceled"
 
+    
+    _sql_constraints = [
+        ('expected_price_check', 'CHECK(expected_price >= 0)',
+         'The expected price is strictly  positive'),
+        ('selling_price_check', 'CHECK(selling_price >= 0)',
+         'The selling price is strictly positive')
+    ]
+
 ###########################################
 
 class EstatePropertyType(models.Model):
@@ -94,6 +103,9 @@ class EstatePropertyTag(models.Model):
     _name="estate.tag"
     _description = "A property tag is, for example, a property which is ‘cozy’ or ‘renovated’."
     name=fields.Char(required=True)
+    _sql_constraints = [
+       ('unique_tag', 'unique(name)', 'The tag name should be unique!')
+    ]
 
 ###########################################
 class EstatePropertyOffer(models.Model):
@@ -108,7 +120,12 @@ class EstatePropertyOffer(models.Model):
     validity=fields.Integer(string="validity (Days)",default=7)
     create_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     date_deadline=fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
-    #date_deadline=fields.Date(compute="_compute_deadline")
+
+
+    _sql_constraints = [
+        ('price_check', 'CHECK(price >= 0)',
+         'The offered price must be strictly positive')
+    ]
 
     @api.depends("validity","create_date")
     def _compute_deadline(self):
