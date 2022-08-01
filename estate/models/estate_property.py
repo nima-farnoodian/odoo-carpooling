@@ -1,3 +1,4 @@
+import datetime
 from odoo import models, fields, api
 
 
@@ -80,4 +81,20 @@ class EstatePropertyOffer(models.Model):
         help="The status of the offer")
     partner_id=fields.Many2one('res.partner', string='Offer maker',copy=False,Required=True)
     property_id=fields.Many2one('estate.property',string="Property")
+    validity=fields.Integer(string="Validity",default=7)
+    create_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
+    #date_deadline=fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
+    date_deadline=fields.Date(compute="_compute_deadline")
 
+    @api.depends("validity","create_date")
+    def _compute_deadline(self):
+        for record in self:
+            if record.create_date:
+                record.date_deadline = record.create_date+ datetime.timedelta(days=record.validity) 
+
+
+    '''
+    def _inverse_deadline(self):
+        for record in self:
+            record.validity = int(record.date_deadline- record.create_date)
+    '''
