@@ -37,6 +37,10 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Form Viwe">
+                <header>
+                    <button name="sold_action" type="object" string="Sold" />
+                    <button name="cancel_action" type="object" string="Cancel" />
+                </header>
                 <sheet>
                     <h1>
                         My new house 

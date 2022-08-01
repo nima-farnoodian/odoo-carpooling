@@ -1,6 +1,7 @@
+from curses.ascii import US
 import datetime
 from odoo import models, fields, api
-
+from odoo.exceptions import UserError
 
 class EstateProperty(models.Model):
     _name = "estate.property"
@@ -26,8 +27,8 @@ class EstateProperty(models.Model):
     active=fields.Boolean(default=True)
     Status=fields.Selection(
         string="Status",
-        selection=[("new","New"),("Offer_Received","Offer Received"),("Offer_Accepted","Offer Accepted,"),("sold","Sold"),('canceled','Canceled')]
-        )
+        selection=[("new","New"),("Offer_Received","Offer Received"),("Offer_Accepted","Offer Accepted"),("Offer_Refused","Offer Refused"),("sold","Sold"),('canceled','Canceled')],
+        default="new")
     type=fields.Many2one("estate.type",string="Type")
     salesperson = fields.Many2one('res.users', string='Salesperson', index=True, tracking=True, default=lambda self: self.env.user)
     
@@ -36,7 +37,7 @@ class EstateProperty(models.Model):
         help="Linked partner. You can find a partner by its Name, TIN, Email or Internal Reference.")
     tag=fields.Many2many("estate.tag",string="Tags")
     
-    offer_ids=fields.One2many("estate.offer","property_id",string="offers")
+    offer_ids=fields.One2many("estate.offer","property_id",string="Offers")
 
     total_area=fields.Float(compute="_compute_total_area", store=True, string="Total Area (sqm)")
 
@@ -67,6 +68,19 @@ class EstateProperty(models.Model):
             self.garden_area=0
             self.garden_orientation=""
 
+    def sold_action(self):
+        for record in self:
+            if record.Status=="canceled":
+                 raise UserError("The canceled property cannot be sold. Try to add a new property for selling.")
+            else:
+                record.Status="sold"
+
+    def cancel_action(self):
+        for record in self:
+            if record.Status=="sold":
+                raise UserError("The sold property cannot be canceled")
+            else:
+                record.Status="canceled"
 
 ###########################################
 
@@ -91,7 +105,7 @@ class EstatePropertyOffer(models.Model):
         help="The status of the offer")
     partner_id=fields.Many2one('res.partner', string='Offer maker',copy=False,Required=True)
     property_id=fields.Many2one('estate.property',string="Property")
-    validity=fields.Integer(string="Validity",default=7)
+    validity=fields.Integer(string="validity (Days)",default=7)
     create_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     date_deadline=fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
     #date_deadline=fields.Date(compute="_compute_deadline")
@@ -106,4 +120,26 @@ class EstatePropertyOffer(models.Model):
         for record in self:
             diff=record.date_deadline- record.create_date
             record.validity = diff.days
+
+    def action_accept(self):
+        for record in self:
+            if record.property_id.Status!="sold" and record.property_id.Status!="canceled":
+                record.Status = "accepted"
+                record.property_id.selling_price=record.price
+                record.property_id.buyer=record.partner_id
+                record.property_id.Status="Offer_Accepted"
+            else:
+                raise UserError("An offer for a sold or canceled property cannot be accepted.")
+        return True
+
+    def action_refuse(self):
+        for record in self:
+            if record.property_id.Status!="sold" and record.property_id.Status!="canceled":
+                record.Status = "refused"
+                record.property_id.selling_price=0
+                record.property_id.buyer=""
+                # record.property_id.Status="Offer_Refused"
+            else:
+                raise UserError("The property has been either sold or canceled, thus refusing an offer is no longer valid.") 
+        return True
     
