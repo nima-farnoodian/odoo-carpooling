@@ -49,6 +49,8 @@
                         <group>
                             <field name="expected_price"/>
                             <field name="selling_price"/>
+                            <field name="best_price"/>
+                            
                         </group>
                         <!-- <separator string="Requirements"/> -->
                         <notebook  colspan="4">
@@ -65,6 +67,7 @@
                                     <field name="garden_orientation"/>
                                     <field name="Status"/>
                                     <field name="type"/>
+                                    <field name="total_area"/>
                                 </group>
            
                             </page>

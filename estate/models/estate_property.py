@@ -12,6 +12,7 @@ class EstateProperty(models.Model):
     selling_price=fields.Float(readonly=True,copy=False)
     bedrooms=fields.Integer(default=2)
     living_area=fields.Integer()
+
     facades=fields.Integer()
     garage=fields.Boolean()
     garden=fields.Boolean()
@@ -33,20 +34,43 @@ class EstateProperty(models.Model):
         'res.partner', string='Buyer', index=True, tracking=10,copy=False,
         help="Linked partner. You can find a partner by its Name, TIN, Email or Internal Reference.")
     tag=fields.Many2many("estate.tag",string="Tags")
+    
     offer_ids=fields.One2many("estate.offer","property_id",string="offers")
 
+    total_area=fields.Float(compute="_compute_total_area", store=True, string="Total Area (sqm)")
+
+    best_price=fields.Float(compute="_get_best_price",store=True,string="Best Offer Price")
+
+    @api.depends("offer_ids")
+    def _get_best_price(self):
+        for record in self:
+            if len(record.offer_ids.mapped("price"))>0:
+                print(record.offer_ids.mapped("price"))
+                record.best_price = max(record.offer_ids.mapped("price"))
+            else:
+                record.best_price=0.0
+
+
+    @api.depends("living_area","garden_area")
+    def _compute_total_area(self):
+        for record in self:
+            record.total_area = record.garden_area+ record.living_area
+
+
+###########################################
 
 class EstatePropertyType(models.Model):
     _name = "estate.type"
     _description = "Real Estate Property Type as there could be many types"
     name=fields.Char(required=True)
 
+###########################################
 class EstatePropertyTag(models.Model):
     _name="estate.tag"
     _description = "A property tag is, for example, a property which is ‘cozy’ or ‘renovated’."
     name=fields.Char(required=True)
 
-
+###########################################
 class EstatePropertyOffer(models.Model):
     _name="estate.offer"
     _description="An offer to a property"
@@ -56,3 +80,4 @@ class EstatePropertyOffer(models.Model):
         help="The status of the offer")
     partner_id=fields.Many2one('res.partner', string='Offer maker',copy=False,Required=True)
     property_id=fields.Many2one('estate.property',string="Property")
+
