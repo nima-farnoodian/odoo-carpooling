@@ -58,6 +58,16 @@ class EstateProperty(models.Model):
             record.total_area = record.garden_area+ record.living_area
 
 
+    @api.onchange("garden")
+    def _onchange_partner_id(self):
+        if self.garden==True:
+            self.garden_area=10
+            self.garden_orientation="north"
+        else:
+            self.garden_area=0
+            self.garden_orientation=""
+
+
 ###########################################
 
 class EstatePropertyType(models.Model):
