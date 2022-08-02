@@ -93,13 +93,10 @@ class EstateProperty(models.Model):
          'The selling price is strictly positive')
     ]
 
-   # python constraibt
+   # python constraibt for selling price
     @api.constrains('selling_price')
     def _check_selling_price(self):
         for record in self:
-            print("Condition:")
-            print(float_utils.float_compare(record.selling_price,.9*record.expected_price,2))
-            print("The selling price cannot be lower than 90%% of the expected price.")
             if float_utils.float_is_zero(record.selling_price,2)!=True:
                 if float_utils.float_compare(record.selling_price,.9*record.expected_price,2)==-1:
                     record.selling_price=0
@@ -167,8 +164,10 @@ class EstatePropertyOffer(models.Model):
         for record in self:
             if record.property_id.Status!="sold" and record.property_id.Status!="canceled":
                 record.Status = "refused"
-                record.property_id.selling_price=0
-                record.property_id.buyer=""
+                if  record.property_id.selling_price!=0:
+                    #record.property_id.selling_price=0
+                    #record.property_id.buyer=""
+                    pass
                 # record.property_id.Status="Offer_Refused"
             else:
                 raise UserError("The property has been either sold or canceled, thus refusing an offer is no longer valid.") 
