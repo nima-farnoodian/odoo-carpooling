@@ -1,7 +1,9 @@
 from curses.ascii import US
 import datetime
 from odoo import models, fields, api
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError,ValidationError
+from  odoo.tools import float_utils
+
 
 class EstateProperty(models.Model):
     _name = "estate.property"
@@ -91,6 +93,18 @@ class EstateProperty(models.Model):
          'The selling price is strictly positive')
     ]
 
+   # python constraibt
+    @api.constrains('selling_price')
+    def _check_selling_price(self):
+        for record in self:
+            print("Condition:")
+            print(float_utils.float_compare(record.selling_price,.9*record.expected_price,2))
+            print("The selling price cannot be lower than 90%% of the expected price.")
+            if float_utils.float_is_zero(record.selling_price,2)!=True:
+                if float_utils.float_compare(record.selling_price,.9*record.expected_price,2)==-1:
+                    record.selling_price=0
+                    record.buyer=""
+                    raise ValidationError("The selling price cannot be lower than 90%% of the expected price.")
 ###########################################
 
 class EstatePropertyType(models.Model):
@@ -159,4 +173,6 @@ class EstatePropertyOffer(models.Model):
             else:
                 raise UserError("The property has been either sold or canceled, thus refusing an offer is no longer valid.") 
         return True
-    
+
+ 
+        
