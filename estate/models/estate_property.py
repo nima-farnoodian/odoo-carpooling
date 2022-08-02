@@ -108,6 +108,7 @@ class EstatePropertyType(models.Model):
     _name = "estate.type"
     _description = "Real Estate Property Type as there could be many types"
     name=fields.Char(required=True)
+    property_list=fields.One2many("estate.property","type","List of properties")
 
 ###########################################
 class EstatePropertyTag(models.Model):
@@ -128,7 +129,7 @@ class EstatePropertyOffer(models.Model):
         help="The status of the offer")
     partner_id=fields.Many2one('res.partner', string='Offer maker',copy=False,Required=True)
     property_id=fields.Many2one('estate.property',string="Property")
-    validity=fields.Integer(string="validity (Days)",default=7)
+    validity=fields.Integer(string="Validity (Days)",default=7)
     create_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     date_deadline=fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
 
