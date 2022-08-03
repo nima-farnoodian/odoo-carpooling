@@ -28,8 +28,12 @@
                     <h1>
                         <field name="name"/>
                     </h1>
+                    <group>
+                        <field name="offer_count" string="The number of associated offeres for this property:"/> 
+                    </group>
                     <notebook  colspan="4">
                             <page string="Associated properties">
+                                <button class="oe_stat_button"  icon="fa-book" type="action" name="%(estate_offers_view_action)d" string="Show Associated Offers"/>
                                 <field name="property_list" readonly='1'>
                                     <tree>
                                         <field name="name"/>

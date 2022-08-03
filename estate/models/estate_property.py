@@ -1,5 +1,3 @@
-from ast import Store
-from curses.ascii import US
 import datetime
 from odoo import models, fields, api
 from odoo.exceptions import UserError,ValidationError
@@ -114,8 +112,16 @@ class EstatePropertyType(models.Model):
     name=fields.Char(required=True)
     property_list=fields.One2many("estate.property","type","List of properties")
     rank_of_used=fields.Integer(compute="_compute_seq",Store=True)
-    
-    @api.depends("rank_of_used")
+    offer_ids=fields.One2many("estate.offer","property_type_id",string="Offers")
+    offer_count=fields.Integer(compute="_compute_offer",Store=True)
+
+    @api.depends("offer_ids")
+    def _compute_offer(self):
+        for record in self:
+            print("len of types:",len(record.offer_ids.mapped("price")))
+            record.offer_count =len(record.offer_ids.mapped("price"))
+
+    @api.depends("property_list")
     def _compute_seq(self):
         for record in self:
             print("len of types:",len(record.property_list.mapped("name")))
@@ -147,7 +153,7 @@ class EstatePropertyOffer(models.Model):
     validity=fields.Integer(string="Validity (Days)",default=7)
     create_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     date_deadline=fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
-    # property_type_id = fields.Char(related="property_id.type", store=True)
+    property_type_id=fields.Many2one("estate.type",related="property_id.type",store=True )
 
     _sql_constraints = [
         ('price_check', 'CHECK(price >= 0)',
