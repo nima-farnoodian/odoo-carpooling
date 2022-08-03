@@ -147,7 +147,7 @@ class EstatePropertyOffer(models.Model):
     validity=fields.Integer(string="Validity (Days)",default=7)
     create_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     date_deadline=fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
-
+    # property_type_id = fields.Char(related="property_id.type", store=True)
 
     _sql_constraints = [
         ('price_check', 'CHECK(price >= 0)',

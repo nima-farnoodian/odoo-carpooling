@@ -12,6 +12,7 @@
                     <button name="action_accept" string="Accept" type="object" icon="fa-check" attrs="{'invisible': [('Status', 'in', ('accepted','refused'))]}"/>
                     <button name="action_refuse" string="Refuse" type="object" icon="fa-times" attrs="{'invisible': [('Status', 'in', ('accepted','refused'))]}"/>
                     <field name="Status"/>
+                    <!-- <field name="property_type_id"/> -->
                 </tree>
             </field>
         </record>

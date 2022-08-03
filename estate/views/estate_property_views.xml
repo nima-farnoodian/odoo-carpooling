@@ -4,6 +4,7 @@
         <field name="name">Estate property: Show Information</field>
         <field name="res_model">estate.property</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_availability': True, 'search_default_current': True}</field>
     </record>
 
     <record id="estate_property_view_tree" model="ir.ui.view">
@@ -100,31 +101,30 @@
     </record>
 
 
-      <record id="estate_property_search" model="ir.ui.view">
-            <field name="name">Estate Property Search</field>
-            <field name="model">estate.property</field>
-            <field name="arch" type="xml">
-                <search string="Property Search">
-                    <field name="name" string="Title" />
-                    <field name="postcode" string="Postcode" />
-                    <field name="expected_price" />
-                    <field name="bedrooms" />
-                    <field name="living_area" />
-                    <field name="facades"/>
-                    <field name="type"/>
-                    <field name="salesperson"/>
-                    <field name="buyer"/>
-                    <!-- <filter_domain="[ ('living_area', '>', 100)]"/> -->
-                    <separator/>
-                    <filter string="Available" name='availability' domain="[('state','=','New')]"/>
-                    <filter string="Many Bedrooms" name='manyBeds' domain="[('bedrooms','>',2)]"/>
-                    <group expand="1" string="Group By">
-                        <filter string="Group by Postcode" name="postcode_groupby" context="{'group_by':'postcode', 'residual_visible':True}"/>
-                    </group>
-                    
-                </search>
-            </field>
-        </record>
+    <record id="estate_property_search" model="ir.ui.view">
+        <field name="name">Estate Property Search</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <search string="Property Search">
+                <field name="name" string="Title" />
+                <field name="postcode" string="Postcode" />
+                <field name="expected_price" />
+                <field name="bedrooms" />
+                <field name="living_area" filter_domain="[('living_area', '>=', self)]"/>
+                <field name="facades"/>
+                <field name="type"/>
+                <field name="salesperson"/>
+                <field name="buyer"/>
+                <!-- <filter_domain="[ ('living_area', '>', 100)]"/> -->
+                <separator/>
+                <filter string="Available" name='availability' domain="[('state','=','new')]"/>
+                <filter string="Many Bedrooms" name='manyBeds' domain="[('bedrooms','>',2)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Group by Postcode" name="postcode_groupby" context="{'group_by':'postcode', 'residual_visible':True}"/>
+                </group>
+            </search>
+        </field>
+    </record>
 
 
 </odoo>
