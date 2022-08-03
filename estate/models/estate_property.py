@@ -1,3 +1,4 @@
+from ast import Store
 from curses.ascii import US
 import datetime
 from odoo import models, fields, api
@@ -8,6 +9,7 @@ from  odoo.tools import float_utils
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Real Estate Property "
+    _order = "id desc"
     name=fields.Char(required=True)
     description=fields.Text()
     postcode=fields.Char()
@@ -27,9 +29,9 @@ class EstateProperty(models.Model):
         help="The orientation of the place.")
     
     active=fields.Boolean(default=True)
-    Status=fields.Selection(
+    state=fields.Selection(
         string="Status",
-        selection=[("new","New"),("Offer_Received","Offer Received"),("Offer_Accepted","Offer Accepted"),("Offer_Refused","Offer Refused"),("sold","Sold"),('canceled','Canceled')],
+        selection=[("new","New"),("Offer_Received","Offer Received"),("Offer_Accepted","Offer Accepted"),("sold","Sold"),('canceled','Canceled')],
         default="new")
     type=fields.Many2one("estate.type",string="Type")
     salesperson = fields.Many2one('res.users', string='Salesperson', index=True, tracking=True, default=lambda self: self.env.user)
@@ -73,17 +75,17 @@ class EstateProperty(models.Model):
 
     def sold_action(self):
         for record in self:
-            if record.Status=="canceled":
+            if record.state=="canceled":
                  raise UserError("The canceled property cannot be sold. Try to add a new property for selling.")
             else:
-                record.Status="sold"
+                record.state="sold"
 
     def cancel_action(self):
         for record in self:
-            if record.Status=="sold":
+            if record.state=="sold":
                 raise UserError("The sold property cannot be canceled")
             else:
-                record.Status="canceled"
+                record.state="canceled"
 
     
     _sql_constraints = [
@@ -107,14 +109,26 @@ class EstateProperty(models.Model):
 class EstatePropertyType(models.Model):
     _name = "estate.type"
     _description = "Real Estate Property Type as there could be many types"
+    _order = "sequence,rank_of_used"
+    sequence = fields.Integer('Sequence',default=1, help="Used to order types. Higher is better.")
     name=fields.Char(required=True)
     property_list=fields.One2many("estate.property","type","List of properties")
+    rank_of_used=fields.Integer(compute="_compute_seq",Store=True)
+    
+    @api.depends("rank_of_used")
+    def _compute_seq(self):
+        for record in self:
+            print("len of types:",len(record.property_list.mapped("name")))
+            record.rank_of_used =len(record.property_list.mapped("name"))
 
 ###########################################
 class EstatePropertyTag(models.Model):
     _name="estate.tag"
     _description = "A property tag is, for example, a property which is ‘cozy’ or ‘renovated’."
+    _order = "name"
     name=fields.Char(required=True)
+    color=fields.Integer()
+
     _sql_constraints = [
        ('unique_tag', 'unique(name)', 'The tag name should be unique!')
     ]
@@ -123,6 +137,7 @@ class EstatePropertyTag(models.Model):
 class EstatePropertyOffer(models.Model):
     _name="estate.offer"
     _description="An offer to a property"
+    _order = "price desc"
     price=fields.Float(required=True,string="Offered Price")
     Status=fields.Selection(string="Status",
         selection=[("accepted","Accepted"),("refused","Refused")],
@@ -152,24 +167,24 @@ class EstatePropertyOffer(models.Model):
 
     def action_accept(self):
         for record in self:
-            if record.property_id.Status!="sold" and record.property_id.Status!="canceled":
+            if record.property_id.state!="sold" and record.property_id.state!="canceled":
                 record.Status = "accepted"
                 record.property_id.selling_price=record.price
                 record.property_id.buyer=record.partner_id
-                record.property_id.Status="Offer_Accepted"
+                record.property_id.state="Offer_Accepted"
             else:
                 raise UserError("An offer for a sold or canceled property cannot be accepted.")
         return True
 
     def action_refuse(self):
         for record in self:
-            if record.property_id.Status!="sold" and record.property_id.Status!="canceled":
+            if record.property_id.state!="sold" and record.property_id.state!="canceled":
                 record.Status = "refused"
                 if  record.property_id.selling_price!=0:
                     #record.property_id.selling_price=0
                     #record.property_id.buyer=""
                     pass
-                # record.property_id.Status="Offer_Refused"
+                # record.property_id.state="Offer_Refused"
             else:
                 raise UserError("The property has been either sold or canceled, thus refusing an offer is no longer valid.") 
         return True

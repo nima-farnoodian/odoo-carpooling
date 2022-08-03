@@ -4,17 +4,20 @@
             <field name="name">Offers List</field>
             <field name="model">estate.offer</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree editable="bottom" decoration-success="Status=='accepted'" decoration-danger="Status=='refused'">
                     <field name="price"/>
                     <field name="partner_id"/>
                     <field name="validity"/>
                     <field name="date_deadline"/>
-                    <button name="action_accept" string="Accept" type="object" icon="fa-check" invisible="1"/>
-                    <button name="action_refuse" string="Refuse" type="object" icon="fa-times" invisible="1"/>
+                    <button name="action_accept" string="Accept" type="object" icon="fa-check" attrs="{'invisible': [('Status', 'in', ('accepted','refused'))]}"/>
+                    <button name="action_refuse" string="Refuse" type="object" icon="fa-times" attrs="{'invisible': [('Status', 'in', ('accepted','refused'))]}"/>
                     <field name="Status"/>
                 </tree>
             </field>
         </record>
+
+
+        <!-- The below form view is not used as the editable is active for tree view -->
 
         <record id="estate_offers_form" model="ir.ui.view">
             <field name="name">Offer</field>

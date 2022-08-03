@@ -7,6 +7,17 @@
     </record>
 
 
+    <record id="estate_property_type_view_tree" model="ir.ui.view">
+        <field name="name">Type List</field>
+        <field name="model">estate.type</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
 
     <record id="estate_property_type_form" model="ir.ui.view">
         <field name="name">Property Type</field>
@@ -17,21 +28,19 @@
                     <h1>
                         <field name="name"/>
                     </h1>
-
                     <notebook  colspan="4">
                             <page string="Associated properties">
-                                <field name="property_list">
+                                <field name="property_list" readonly='1'>
                                     <tree>
                                         <field name="name"/>
                                         <field name="expected_price"/>
-                                        <field name="Status"/>
+                                        <field name="state"/>
                                     </tree>
                                 </field>
                             </page>
                     </notebook>
             </sheet>
             </form>
-
         </field>
     </record>
 </odoo>
