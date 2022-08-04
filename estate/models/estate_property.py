@@ -31,7 +31,7 @@ class EstateProperty(models.Model):
         string="Status",
         selection=[("new","New"),("Offer_Received","Offer Received"),("Offer_Accepted","Offer Accepted"),("sold","Sold"),('canceled','Canceled')],
         default="new")
-    type=fields.Many2one("estate.type",string="Type")
+    type=fields.Many2one("estate.type",string="Type",ondelete='set null')
     salesperson = fields.Many2one('res.users', string='Salesperson', index=True, tracking=True, default=lambda self: self.env.user)
     
     buyer = fields.Many2one(
@@ -103,16 +103,29 @@ class EstateProperty(models.Model):
                     record.buyer=""
                     raise ValidationError("The selling price cannot be lower than 90% of the expected price.")
     
-    # CURD Action (On-Delete)
-    # @api.multi 
-    # def ondelete(self, vals):
-    #     print("I am here in delete")
+    #CURD Action (On-Delete)
+    # @api.ondelete
+    # def unlink(self, vals):
+    #     print("I am here in unlink")
     #     if vals['state'] not in ("new","canceled"):
     #         msg="It is impossible to remove the property" + vals['name'] +" as it is not now in a New or Canceled status."   
     #         print("Message:",msg)
     #         raise UserError(msg)
     #     # Then call super to execute the parent method
-    #     return super().ondelete(vals)
+    #     return super().unlink(vals)
+    
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_state_new(self):
+        for record in self:
+            if record.state not in ("new","canceled"):
+                msg="It is impossible to remove the property (" + record.name +') as it is not now in a "New" or "Canceled" status.'   
+                print("Message:",msg)
+                raise UserError(msg)
+        #return super() 
+        # return super(EstateProperty, self).unlink()
+        #return models.Model.unlink(self)
+        #return super().unlink()
+
 
 
     @api.model
@@ -174,7 +187,7 @@ class EstatePropertyOffer(models.Model):
         selection=[("accepted","Accepted"),("refused","Refused")],
         help="The status of the offer")
     partner_id=fields.Many2one('res.partner', string='Offer maker',copy=False,Required=True)
-    property_id=fields.Many2one('estate.property',string="Property")
+    property_id=fields.Many2one('estate.property',string="Property",ondelete ='cascade')
     validity=fields.Integer(string="Validity (Days)",default=7)
     create_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     date_deadline=fields.Date(compute="_compute_deadline", inverse="_inverse_deadline")
@@ -221,18 +234,12 @@ class EstatePropertyOffer(models.Model):
         return True
 
     @api.model
-    def create(self, vals):
-        # Do some business logic, modify vals...
-        
-        print("I am here 2")
-        print("All values",vals)
-        
+    def create(self, vals):        
         query ="SELECT * FROM estate_offer where property_id="+str(vals['property_id'])
         self.env.cr.execute(query)
         result=self.env.cr.fetchall()
         if len(result)==0: # To ensure the offer received status is obtained only once when an offer appears.
             self.env.cr.execute("UPDATE estate_property SET state='Offer_Received' WHERE id="+str(vals['property_id']))
-        print("The number of records:",len(result))
         # Then call super to execute the parent method
         return super(EstatePropertyOffer,self).create(vals)
  
