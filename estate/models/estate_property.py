@@ -101,7 +101,32 @@ class EstateProperty(models.Model):
                 if float_utils.float_compare(record.selling_price,.9*record.expected_price,2)==-1:
                     record.selling_price=0
                     record.buyer=""
-                    raise ValidationError("The selling price cannot be lower than 90%% of the expected price.")
+                    raise ValidationError("The selling price cannot be lower than 90% of the expected price.")
+    
+    # CURD Action (On-Delete)
+    # @api.multi 
+    # def ondelete(self, vals):
+    #     print("I am here in delete")
+    #     if vals['state'] not in ("new","canceled"):
+    #         msg="It is impossible to remove the property" + vals['name'] +" as it is not now in a New or Canceled status."   
+    #         print("Message:",msg)
+    #         raise UserError(msg)
+    #     # Then call super to execute the parent method
+    #     return super().ondelete(vals)
+
+
+    @api.model
+    def create(self, vals):
+        # Do some business logic, modify vals...
+        
+        print("I am here 1")
+
+        print("All values for estate.property",vals)
+        
+        # Then call super to execute the parent method
+        return super().create(vals)
+ 
+
 ###########################################
 
 class EstatePropertyType(models.Model):
@@ -195,5 +220,20 @@ class EstatePropertyOffer(models.Model):
                 raise UserError("The property has been either sold or canceled, thus refusing an offer is no longer valid.") 
         return True
 
+    @api.model
+    def create(self, vals):
+        # Do some business logic, modify vals...
+        
+        print("I am here 2")
+        print("All values",vals)
+        
+        query ="SELECT * FROM estate_offer where property_id="+str(vals['property_id'])
+        self.env.cr.execute(query)
+        result=self.env.cr.fetchall()
+        if len(result)==0: # To ensure the offer received status is obtained only once when an offer appears.
+            self.env.cr.execute("UPDATE estate_property SET state='Offer_Received' WHERE id="+str(vals['property_id']))
+        print("The number of records:",len(result))
+        # Then call super to execute the parent method
+        return super(EstatePropertyOffer,self).create(vals)
  
         
