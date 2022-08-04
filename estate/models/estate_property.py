@@ -121,23 +121,18 @@ class EstateProperty(models.Model):
                 msg="It is impossible to remove the property (" + record.name +') as it is not now in a "New" or "Canceled" status.'   
                 print("Message:",msg)
                 raise UserError(msg)
-        #return super() 
-        # return super(EstateProperty, self).unlink()
-        #return models.Model.unlink(self)
-        #return super().unlink()
 
 
-
-    @api.model
-    def create(self, vals):
-        # Do some business logic, modify vals...
+    # @api.model
+    # def create(self, vals):
+    #     # Do some business logic, modify vals...
         
-        print("I am here 1")
+    #     print("I am here 1")
 
-        print("All values for estate.property",vals)
+    #     print("All values for estate.property",vals)
         
-        # Then call super to execute the parent method
-        return super().create(vals)
+    #     # Then call super to execute the parent method
+    #     return super().create(vals)
  
 
 ###########################################
@@ -243,4 +238,18 @@ class EstatePropertyOffer(models.Model):
         # Then call super to execute the parent method
         return super(EstatePropertyOffer,self).create(vals)
  
-        
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_Status_null(self):
+        for record in self:
+            query ="SELECT * FROM estate_offer where property_id="+str(record.property_id.id)
+            self.env.cr.execute(query)
+            result=self.env.cr.fetchall()
+            print("Result:",len(result))
+            if len(result)==1:
+                self.env.cr.execute("UPDATE estate_property SET state='new' WHERE id="+str(record.property_id.id))
+                #record.property_id.state='new'
+
+
+# class InheritedModel(models.Model):
+#     _inherit = "res.users"
+#     property_ids = fields.One2many('estate.property',"salesperson")

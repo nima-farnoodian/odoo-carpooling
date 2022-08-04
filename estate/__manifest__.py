@@ -30,6 +30,7 @@
         'views/estate_property_type_views.xml',
         'views/estate_property_tags_views.xml',
         'views/estate_property_views.xml',
+        'views/user_updated_view.xml',
         'views/estate_menus.xml',
         
         
