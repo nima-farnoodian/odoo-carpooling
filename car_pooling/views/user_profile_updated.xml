@@ -1,0 +1,32 @@
+
+<odoo>
+        <record id="res_users_view_form" model="ir.ui.view">
+            <field name="name">res.users.view.form.inherit.properties</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <!-- find field description and add the field
+                    new_field after it -->
+                <xpath expr="//field[@name='email']" position="after">
+                    <group>
+                        <field name="is_volunteer" />
+                    </group>
+                </xpath> 
+                <xpath expr="//page[@name='preferences']" position="before">
+                <!-- <xpath expr="//page[@name='account_security']" position="after"> -->
+                    <page string="Vehicle Information" > 
+                        <group>
+                             <field name="car_name"/>
+                             <field name="Car_model" attrs="{'invisible': [('is_volunteer', '=', 'True')]}"/>
+                             <field name="car_type"/>
+                             <field name="car_plate_number"/>
+                             <field name="car_color" options="{'color_field': 'car_color'}" />
+                        </group>
+                        <group>
+                            <field name="Car_image" widget="image" class="oe_avatar" options='{"preview_image": "Car_image"}'/>
+                        </group>
+                    </page>
+                </xpath> 
+            </field>
+        </record>
+</odoo>

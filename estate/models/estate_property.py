@@ -103,17 +103,6 @@ class EstateProperty(models.Model):
                     record.buyer=""
                     raise ValidationError("The selling price cannot be lower than 90% of the expected price.")
     
-    #CURD Action (On-Delete)
-    # @api.ondelete
-    # def unlink(self, vals):
-    #     print("I am here in unlink")
-    #     if vals['state'] not in ("new","canceled"):
-    #         msg="It is impossible to remove the property" + vals['name'] +" as it is not now in a New or Canceled status."   
-    #         print("Message:",msg)
-    #         raise UserError(msg)
-    #     # Then call super to execute the parent method
-    #     return super().unlink(vals)
-    
     @api.ondelete(at_uninstall=False)
     def _unlink_if_state_new(self):
         for record in self:
@@ -237,7 +226,7 @@ class EstatePropertyOffer(models.Model):
             self.env.cr.execute("UPDATE estate_property SET state='Offer_Received' WHERE id="+str(vals['property_id']))
         # Then call super to execute the parent method
         return super(EstatePropertyOffer,self).create(vals)
- 
+    #TODO the following function cannot set the state=new when all non-status offers are removed. Fix it though it is not generally required.
     @api.ondelete(at_uninstall=False)
     def _unlink_if_Status_null(self):
         for record in self:
@@ -247,9 +236,4 @@ class EstatePropertyOffer(models.Model):
             print("Result:",len(result))
             if len(result)==1:
                 self.env.cr.execute("UPDATE estate_property SET state='new' WHERE id="+str(record.property_id.id))
-                #record.property_id.state='new'
 
-
-# class InheritedModel(models.Model):
-#     _inherit = "res.users"
-#     property_ids = fields.One2many('estate.property',"salesperson")

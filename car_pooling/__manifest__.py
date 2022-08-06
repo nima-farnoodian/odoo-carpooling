@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "estate",
+    'name': "Car Pooling",
 
     'summary': """
-        A training project to learn Odoo ecosystem""",
+        An app to share the vehicles by Odoo users for free commuting.""",
 
     'description': """
         Long description of module's purpose
     """,
 
-    'author': "UCLouvain: Nima Farnoodian",
+    'author': "Nima Farnoodian: UCLouvain",
     'website': "http://www.uclouvain.be",
 
     # Categories can be used to filter modules in modules listing
@@ -23,17 +23,10 @@
 
     # always loaded
     'data': [
-        'security/ir.model.access.csv',
+        # 'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
-        'views/estate_offers.xml',
-        'views/estate_property_type_views.xml',
-        'views/estate_property_tags_views.xml',
-        'views/estate_property_views.xml',
-        'views/user_updated_view.xml',
-        'views/estate_menus.xml',
-        
-        
+        'views/user_profile_updated.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
