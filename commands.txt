@@ -1,0 +1,15 @@
+connecting database
+docker run -d -e POSTGRES_USER=odoo -e POSTGRES_PASSWORD=odoo -e POSTGRES_DB=postgres --name db postgres:13
+
+
+connecting odoo to the rep
+
+docker run -p 8069:8069 -d --name odoo --link db:db -v c:/Users/Atefe/odoo-project/odoo-training/:/mnt/extra-addons -t odoo -- -d odoo
+
+
+
+commands for creating a new module inside the current repository
+
+./bin/bash
+odoo scaffold "module name" /mnt/extra-addons/
+

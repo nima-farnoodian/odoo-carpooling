@@ -9,18 +9,21 @@
                     new_field after it -->
                 <xpath expr="//field[@name='email']" position="after">
                     <group>
+                        <field name="phone_number" />
                         <field name="is_volunteer" />
                     </group>
                 </xpath> 
                 <xpath expr="//page[@name='preferences']" position="before">
                 <!-- <xpath expr="//page[@name='account_security']" position="after"> -->
-                    <page string="Vehicle Information" > 
+            
+                    <page string="Vehicle Information"  attrs="{'invisible': [('is_volunteer', '=', False)]}"> 
                         <group>
                              <field name="car_name"/>
-                             <field name="Car_model" attrs="{'invisible': [('is_volunteer', '=', 'True')]}"/>
+                             <!-- <field name="Car_model" attrs="{'invisible': [('is_volunteer', '=', 'True')]}"/> -->
+                             <field name="Car_model"/>
                              <field name="car_type"/>
                              <field name="car_plate_number"/>
-                             <field name="car_color" options="{'color_field': 'car_color'}" />
+                             <field name="car_color"  widget='color' />
                         </group>
                         <group>
                             <field name="Car_image" widget="image" class="oe_avatar" options='{"preview_image": "Car_image"}'/>
