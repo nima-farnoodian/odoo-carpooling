@@ -170,7 +170,7 @@ class EstatePropertyOffer(models.Model):
     Status=fields.Selection(string="Status",
         selection=[("accepted","Accepted"),("refused","Refused")],
         help="The status of the offer")
-    partner_id=fields.Many2one('res.partner', string='Offer maker',copy=False,Required=True)
+    partner_id=fields.Many2one('res.partner', string='Offer maker',copy=False,required=True)
     property_id=fields.Many2one('estate.property',string="Property",ondelete ='cascade')
     validity=fields.Integer(string="Validity (Days)",default=7)
     create_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())

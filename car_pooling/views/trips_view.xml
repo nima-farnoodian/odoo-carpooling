@@ -1,0 +1,34 @@
+<odoo>
+
+    <record id="car_pooling_action" model="ir.actions.act_window">
+        <field name="name">Car pooling: Trips</field>
+        <field name="res_model">car.pooling</field>
+        <field name="view_mode">tree,form</field>
+        <!-- <field name="context">{'search_default_availability': True, 'search_default_current': True}</field> -->
+    </record>
+
+
+    
+    <record id="car_pooling_view_tree" model="ir.ui.view">
+        <field name="name">Trips</field>
+        <field name="model">car.pooling</field>
+        <field name="arch" type="xml">
+            <!-- <tree decoration-success="state in ('Offer_Received','Offer_Accepted')"  decoration-muted="state=='sold'"  decoration-bf="state=='Offer_Accepted'" decoration-danger="state=='canceled'"> -->
+            <tree>
+                <field name="driver"/>
+                <field name="source_city"/>
+                <field name="source_address"/>
+                <field name="departure_time" optional="1"/>
+                <field name="capacity"/>
+                <field name="status"/>
+                <field name="tag"/>
+                <field name="is_round_trip"/>
+                <field name="return_time"/>
+                <field name="capacity_return"/>
+                <!-- <field name="passanger_ids"/> -->
+            </tree>
+        </field>
+    </record>
+
+
+</odoo>
