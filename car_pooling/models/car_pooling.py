@@ -20,17 +20,23 @@ class CarPooling(models.Model):
     capacity=fields.Integer(required=True)
     status=fields.Selection(
         string="Status",
-        selection=[("available","Available"),("full","Full"),("unavailable","Unavailable"),('canceled','Canceled')],
+        selection=[("available","Available"),("full","Full"),("unavailable","Unavailable"),("departed","Departed"),('canceled','Canceled')],
         default="available")
-    
-    tag=fields.Many2many("estate.tag",string="Tags")
+    comments=fields.Char(help="The comments for the trips")
+    tag=fields.Many2many("car.pooling.tag",string="Tags")
     is_round_trip=fields.Boolean(string="Round Trip")
     return_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     return_time = fields.Float('Return Time',copy=False)
     # capacity_return=fields.Integer(string="Capacity for return", required=True)
     passanger_ids=fields.One2many("car.pooling.passanger","trip_id",string="Passangers")
     
-
+    def cancel_action(self):
+        # This function is responsible for canceling a trip if the trip is not in "departed" status.
+        for record in self:
+            if record.status=="departed":
+                raise UserError("The departed trip cannot be canceled")
+            else:
+                record.status="canceled"
 #############################################################
 class CarPoolingTag(models.Model):
     _name="car.pooling.tag"

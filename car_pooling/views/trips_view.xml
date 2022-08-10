@@ -16,13 +16,17 @@
             <!-- <tree decoration-success="state in ('Offer_Received','Offer_Accepted')"  decoration-muted="state=='sold'"  decoration-bf="state=='Offer_Accepted'" decoration-danger="state=='canceled'"> -->
             <tree>
                 <field name="driver"/>
+                <field name="capacity"/>
                 <field name="source_city"/>
                 <field name="source_address"/>
-                <field name="departure_time" optional="1"/>
-                <field name="capacity"/>
+                <field name="departure_date" />
+                <field name="departure_time"/>
+                <field name="destination_city"/>
+                <field name="destination_address"/>
                 <field name="status"/>
-                <field name="tag"/>
+                <field name="tag" optional="1"/>
                 <field name="is_round_trip"/>
+                <field name="return_date" />           
                 <field name="return_time"/>
                 <!-- <field name="passanger_ids"/> -->
             </tree>
@@ -37,8 +41,8 @@
         <field name="arch" type="xml">
             <form string="Form Viwe">
                 <header>
-                        <!-- <button name="sold_action" type="object" string="Sold" states='Offer_Accepted'/>
-                        <button name="cancel_action" type="object" string="Cancel" attrs="{'invisible': [('state', '=', 'sold')]}"/>  -->
+                        <!-- <button name="sold_action" type="object" string="Sold" states='Offer_Accepted'/> -->
+                        <button name="cancel_action" type="object" string="Cancel" attrs="{'invisible': [('status', '=', 'departed')]}"/> 
                         <field name="status" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -57,7 +61,7 @@
                         <notebook  colspan="4">
                             <page string="Trip Information">
                                 <group>
-                                    <field name="departure_time"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="departure_date"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
                                     <field name="departure_time" widget="float_time"/>
                                     <field name="source_city"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
                                     <field name="source_address" attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
@@ -77,6 +81,11 @@
                                     <field name="buyer"  attrs="{'readonly': [('state', 'in', ('sold','canceled'))]}"/> -->
                                 </group>
                             </page>
+                            <page string="Driver Comments">
+                                <group>
+                                    <field name="comments"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/> 
+                                </group>
+                            </page>
                             <page string="Tags">
                                 <group>
                                     <field name="tag" widget="many2many_tags" options="{'color_field': 'color'}"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
@@ -85,6 +94,13 @@
                             <page string="Passanger">
                                 <group>
                                     <field name="passanger_ids"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                </group>
+                            </page>
+                            <page string="Comments for Driver">
+                                <group>
+                                    <h1>
+                                       Comments for Driver will appear here
+                                    </h1>
                                 </group>
                             </page>
                         </notebook>
