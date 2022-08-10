@@ -24,11 +24,78 @@
                 <field name="tag"/>
                 <field name="is_round_trip"/>
                 <field name="return_time"/>
-                <field name="capacity_return"/>
                 <!-- <field name="passanger_ids"/> -->
             </tree>
         </field>
     </record>
+
+
+
+       <record id="trip_form" model="ir.ui.view">
+        <field name="name">Trip Form</field>
+        <field name="model">car.pooling</field>
+        <field name="arch" type="xml">
+            <form string="Form Viwe">
+                <header>
+                        <!-- <button name="sold_action" type="object" string="Sold" states='Offer_Accepted'/>
+                        <button name="cancel_action" type="object" string="Cancel" attrs="{'invisible': [('state', '=', 'sold')]}"/>  -->
+                        <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <h1>
+                        My new trip 
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="driver"/>
+                        </group>
+                        <group>
+                            <field name="capacity"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                            <field name="is_round_trip"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                        </group>
+                        <!-- <separator string="Requirements"/> -->
+                        <notebook  colspan="4">
+                            <page string="Trip Information">
+                                <group>
+                                    <field name="departure_time"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="departure_time" widget="float_time"/>
+                                    <field name="source_city"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="source_address" attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="destination_city"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="destination_address"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="return_date"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('unavailable','canceled'))]}"/>           
+                                    <field name="return_time"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('unavailable','canceled'))]}"/>           
+                                </group>
+           
+                            </page>
+                            <page string="Driver Information">
+                                <group>
+                                    <h1>
+                                       Driver Information will appear here
+                                    </h1>
+                                    <!-- <field name="salesperson"  attrs="{'readonly': [('state', 'in', ('sold','canceled'))]}"/>
+                                    <field name="buyer"  attrs="{'readonly': [('state', 'in', ('sold','canceled'))]}"/> -->
+                                </group>
+                            </page>
+                            <page string="Tags">
+                                <group>
+                                    <field name="tag" widget="many2many_tags" options="{'color_field': 'color'}"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                </group>
+                            </page>
+                            <page string="Passanger">
+                                <group>
+                                    <field name="passanger_ids"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </group>
+                </sheet>
+            </form>
+
+        </field>
+    </record>
+
+
 
 
 </odoo>

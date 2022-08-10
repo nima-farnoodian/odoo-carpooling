@@ -23,11 +23,12 @@
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
         'views/user_profile_updated.xml',
         'views/trips_view.xml',
+        'views/trips_tags_views.xml',
         'views/trips_menu.xml',
     ],
     # only loaded in demonstration mode

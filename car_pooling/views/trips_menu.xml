@@ -3,9 +3,9 @@
         <menuitem name="List of avaiablities" id="car_pooling">
             <menuitem name="Show Trips" id="car_pooling_show" action="car_pooling_action"/>
         </menuitem>
-        <!-- <menuitem name="Setting" id="estate_property_setting">
-            <menuitem name="Property Types" id="estate_property_type_show" action="estate_property_type_action"/>
-            <menuitem name="Property Tags" id="estate_property_tag_show" action="estate_property_tag_action"/>
-        </menuitem> -->
+        <menuitem name="Setting" id="trip_setting">
+            <!-- <menuitem name="Property Types" id="estate_property_type_show" action="estate_property_type_action"/> -->
+            <menuitem name="Trip Tags" id="trip_tag_show" action="trip_tag_action"/>
+        </menuitem>
     </menuitem>
 </odoo>

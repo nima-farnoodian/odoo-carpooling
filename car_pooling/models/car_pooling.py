@@ -13,7 +13,10 @@ class CarPooling(models.Model):
     driver=fields.Many2one('res.users',required=True,readonly=True, string='Driver (Car owner)', index=True, tracking=True, default=lambda self: self.env.user)
     source_city=fields.Char(required=True)
     source_address=fields.Char(required=True)
-    departure_time=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
+    destination_city=fields.Char(required=True)
+    destination_address=fields.Char(required=True)
+    departure_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
+    departure_time = fields.Float('Departure Time',required=True)
     capacity=fields.Integer(required=True)
     status=fields.Selection(
         string="Status",
@@ -21,9 +24,10 @@ class CarPooling(models.Model):
         default="available")
     
     tag=fields.Many2many("estate.tag",string="Tags")
-    is_round_trip=fields.Boolean()
-    return_time=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
-    capacity_return=fields.Integer(string="Capacity for return", required=True)
+    is_round_trip=fields.Boolean(string="Round Trip")
+    return_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
+    return_time = fields.Float('Return Time',copy=False)
+    # capacity_return=fields.Integer(string="Capacity for return", required=True)
     passanger_ids=fields.One2many("car.pooling.passanger","trip_id",string="Passangers")
     
 
@@ -41,7 +45,7 @@ class CarPoolingTag(models.Model):
 
 #############################################################
 
-class CarPooling(models.Model):
+class CarPoolingPassanger(models.Model):
     _name = "car.pooling.passanger"
     _description = "Passanger"
     _order = "id desc"
