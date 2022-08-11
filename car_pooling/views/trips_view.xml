@@ -13,8 +13,7 @@
         <field name="name">Trips</field>
         <field name="model">car.pooling</field>
         <field name="arch" type="xml">
-            <!-- <tree decoration-success="state in ('Offer_Received','Offer_Accepted')"  decoration-muted="state=='sold'"  decoration-bf="state=='Offer_Accepted'" decoration-danger="state=='canceled'"> -->
-            <tree>
+            <tree decoration-success="status in ('available')"  decoration-warning="status=='full'" decoration-muted="status=='departed'"  decoration-bf="status=='available'" decoration-danger="status=='canceled'">
                 <field name="driver"/>
                 <field name="capacity"/>
                 <field name="source_city"/>
@@ -28,7 +27,7 @@
                 <field name="is_round_trip"/>
                 <field name="return_date" />           
                 <field name="return_time"/>
-                <!-- <field name="passanger_ids"/> -->
+                <!-- <field name="passenger_ids"/> -->
             </tree>
         </field>
     </record>
@@ -41,7 +40,7 @@
         <field name="arch" type="xml">
             <form string="Form Viwe">
                 <header>
-                        <!-- <button name="sold_action" type="object" string="Sold" states='Offer_Accepted'/> -->
+                        <button name="depart_action" type="object" string="Departed" attrs="{'invisible': [('status', '=', 'canceled')]}"/>
                         <button name="cancel_action" type="object" string="Cancel" attrs="{'invisible': [('status', '=', 'departed')]}"/> 
                         <field name="status" widget="statusbar"/>
                 </header>
@@ -75,6 +74,15 @@
                             <page string="Driver Information">
                                 <group>
                                     <h1>
+                                        <field name="driver" readonly='1'>
+                                            <tree>
+                                                <field name="phone_number"/>
+                                                <field name="car_name"/>
+                                                <field name="Car_model"/>
+                                                <field name="car_type"/>
+                                                <field name="car_plate_number"/>
+                                            </tree>
+                                        </field>
                                        Driver Information will appear here
                                     </h1>
                                     <!-- <field name="salesperson"  attrs="{'readonly': [('state', 'in', ('sold','canceled'))]}"/>
@@ -91,9 +99,9 @@
                                     <field name="tag" widget="many2many_tags" options="{'color_field': 'color'}"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
                                 </group>
                             </page>
-                            <page string="Passanger">
+                            <page string="Passenger">
                                 <group>
-                                    <field name="passanger_ids"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="passenger_ids"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
                                 </group>
                             </page>
                             <page string="Comments for Driver">

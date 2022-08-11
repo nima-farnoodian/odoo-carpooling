@@ -1,0 +1,43 @@
+    <odoo>
+        <!-- <record id="estate_offers_view_action" model="ir.actions.act_window">
+            <field name="name">List of Offers associated with this property type</field>
+            <field name="res_model">estate.offer</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">[('property_type_id', '=', active_id)]</field>
+            <field name='context'> {'create': False, 'delete': False}</field>
+        </record> -->
+
+
+        <record id="passenger_view_tree" model="ir.ui.view">
+            <field name="name">Passenger List</field>
+            <field name="model">car.pooling.passenger</field>
+            <field name="arch" type="xml">
+                <tree decoration-success="status=='accepted'" decoration-danger="status=='refused'">
+                    <field name="passenger"/>
+                    <button name="action_accept" string="Accept" type="object" icon="fa-check" attrs="{'invisible': [('status', 'in', ('accepted'))]}"/>
+                    <button name="action_refuse" string="Refuse" type="object" icon="fa-times" attrs="{'invisible': [('status', 'in', ('refused'))]}"/>
+                    <field name="status"/>
+                    <!-- <field name="property_type_id"/> -->
+                </tree>
+            </field>
+        </record>
+
+        <record id="passenger_form" model="ir.ui.view">
+            <field name="name">Passenger</field>
+            <field name="model">car.pooling.passenger</field>
+            <field name="arch" type="xml">
+                <form string="Form Viwe">
+                    <sheet>
+                        <group>
+                            <field name="passenger"/>
+                        </group>
+                        <group>
+                            <field name="status"/>
+                        </group>
+                    </sheet>
+                </form>
+
+            </field>
+        </record>
+
+    </odoo>

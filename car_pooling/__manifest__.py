@@ -29,6 +29,7 @@
         'views/user_profile_updated.xml',
         'views/trips_view.xml',
         'views/trips_tags_views.xml',
+        'views/passenger_view.xml',
         'views/trips_menu.xml',
     ],
     # only loaded in demonstration mode

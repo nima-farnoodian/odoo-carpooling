@@ -28,8 +28,12 @@ class CarPooling(models.Model):
     return_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     return_time = fields.Float('Return Time',copy=False)
     # capacity_return=fields.Integer(string="Capacity for return", required=True)
-    passanger_ids=fields.One2many("car.pooling.passanger","trip_id",string="Passangers")
+    passenger_ids=fields.One2many("car.pooling.passenger","trip_id",string="Passengers")
     
+
+    #TODO On write and On-delete and create api should be added to avoid inconsistency (e.g., what if we update the capacity while it is in full status?)
+    #TODO Book action with its button should be added such that it inserts the user to the passenger list
+
     def cancel_action(self):
         # This function is responsible for canceling a trip if the trip is not in "departed" status.
         for record in self:
@@ -37,6 +41,17 @@ class CarPooling(models.Model):
                 raise UserError("The departed trip cannot be canceled")
             else:
                 record.status="canceled"
+
+    def depart_action(self):
+        # This function is responsible for changing the trip status to "departed" status.
+        for record in self:
+            if record.status=="canceled":
+                raise UserError("The canceled trip cannot be in 'departed' status")
+            else:
+                record.status="departed"
+
+
+    
 #############################################################
 class CarPoolingTag(models.Model):
     _name="car.pooling.tag"
@@ -51,14 +66,43 @@ class CarPoolingTag(models.Model):
 
 #############################################################
 
-class CarPoolingPassanger(models.Model):
-    _name = "car.pooling.passanger"
-    _description = "Passanger"
+class CarPoolingPassenger(models.Model):
+    _name = "car.pooling.passenger"
+    _description = "Passenger"
     _order = "id desc"
-    passanger= fields.Many2one('res.users',required=True,readonly=True, string='Passanger', index=True, tracking=True, default=lambda self: self.env.user)
+    passenger= fields.Many2one('res.users',required=True,readonly=True, string='Passenger', index=True, tracking=True, default=lambda self: self.env.user)
     trip_id=fields.Many2one('car.pooling',string="Trip",ondelete ='cascade')
     status=fields.Selection(string="Status",
         selection=[("accepted","Accepted"),("refused","Refused")],
         help="The status of the trip offer")
+
+
+    #TODO complete the following functions 
+    def action_accept(self):
+        #TODO add automatic odoo message (Accpeted) sent to the passanger
+        for record in self:
+            if record.trip_id.status!="departed" and record.trip_id.status!="canceled":
+                record.status = "accepted"
+                if record.trip_id.capacity>0:
+                    record.trip_id.capacity=record.trip_id.capacity-1
+                    record.status="accepted"
+                    if  record.trip_id.capacity==0:
+                        record.trip_id.status="full"
+                else:
+                    raise UserError("The vehicle does not have capacity for more passenger.")
+            else:
+                raise UserError("No passenger can be added to a departed or canceled trip.")
+        return True
+
+    def action_refuse(self):
+        #TODO add automatic odoo message (Refuse) sent to the passanger
+        for record in self:
+            if record.trip_id.status!="departed" and record.trip_id.status!="canceled":
+                record.status = "refused"
+                record.trip_id.capacity=record.trip_id.capacity+1
+                record.trip_id.status="available"
+            else:
+                raise UserError("No passenger can be removed from a departed or canceled trip.")
+        return True
 ##############################################################
 
