@@ -17,7 +17,7 @@ class CarPooling(models.Model):
     destination_address=fields.Char(required=True)
     departure_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     departure_time = fields.Float('Departure Time',required=True)
-    capacity=fields.Integer(required=True)
+    capacity=fields.Integer(string="Available Seats",required=True)
     status=fields.Selection(
         string="Status",
         selection=[("available","Available"),("full","Full"),("unavailable","Unavailable"),("departed","Departed"),('canceled','Canceled')],
@@ -31,9 +31,7 @@ class CarPooling(models.Model):
     passenger_ids=fields.One2many("car.pooling.passenger","trip_id",string="Passengers")
     
 
-    #TODO On write and On-delete and create api should be added to avoid inconsistency (e.g., what if we update the capacity while it is in full status?)
-    #TODO Book action with its button should be added such that it inserts the user to the passenger list
-
+   
     def cancel_action(self):
         # This function is responsible for canceling a trip if the trip is not in "departed" status.
         for record in self:
@@ -49,6 +47,30 @@ class CarPooling(models.Model):
                 raise UserError("The canceled trip cannot be in 'departed' status")
             else:
                 record.status="departed"
+
+    _sql_constraints = [
+        ('seat_no_check', 'CHECK(capacity >= 0)',
+         'The seat number cannot be negative!')
+    ]
+
+    #TODO On write and On-delete and create api should be added to avoid inconsistency (e.g., what if we update the capacity while it is in full status?)
+    @api.model
+    def create(self, vals):        
+        if vals['capacity']==0:
+            raise UserError("The number of availabe seat should be greater than zero!")
+        # Then call super to execute the parent method
+        return super(CarPooling,self).create(vals)
+    
+    #TODO the following function cannot set the state=new when all non-status offers are removed. Fix it though it is not generally required.
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_passenger_refused(self):
+        if any(record.passenger_ids.status=="accepted" for record in self):
+                msg="There are some passengers in 'accepted' status for this trip. To delete the trip, please make sure you have refused all passenger book requests."   
+                print("Message:",msg)
+                raise UserError(msg)
+
+    
+    #TODO Book action with its button should be added such that it inserts the user to the passenger list
 
 
     
@@ -104,5 +126,12 @@ class CarPoolingPassenger(models.Model):
             else:
                 raise UserError("No passenger can be removed from a departed or canceled trip.")
         return True
+    
+    # @api.ondelete(at_uninstall=False)
+    # def _unlink_if_passenger_refused(self):
+    #     if any(record.passenger_ids.status=="accepted" for record in self):
+    #             msg="There are some passengers in 'accepted' status for this trip. To delete the trip, please make sure you have refused all passenger book requests."   
+    #             print("Message:",msg)
+    #             raise UserError(msg)
 ##############################################################
 
