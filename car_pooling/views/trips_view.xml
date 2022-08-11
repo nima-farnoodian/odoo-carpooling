@@ -53,21 +53,21 @@
                             <field name="driver"/>
                         </group>
                         <group>
-                            <field name="capacity"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
-                            <field name="is_round_trip"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                            <field name="capacity"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
+                            <field name="is_round_trip"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                         </group>
                         <!-- <separator string="Requirements"/> -->
                         <notebook  colspan="4">
                             <page string="Trip Information">
                                 <group>
-                                    <field name="departure_date"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
-                                    <field name="departure_time" widget="float_time"/>
-                                    <field name="source_city"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
-                                    <field name="source_address" attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
-                                    <field name="destination_city"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
-                                    <field name="destination_address"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
-                                    <field name="return_date"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('unavailable','canceled'))]}"/>           
-                                    <field name="return_time"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('unavailable','canceled'))]}"/>           
+                                    <field name="departure_date"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
+                                    <field name="departure_time" widget="float_time" attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
+                                    <field name="source_city"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
+                                    <field name="source_address" attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
+                                    <field name="destination_city" attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
+                                    <field name="destination_address"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
+                                    <field name="return_date"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('departed','unavailable','canceled'))]}"/>           
+                                    <field name="return_time"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('departed','unavailable','canceled'))]}"/>           
                                 </group>
            
                             </page>
@@ -91,17 +91,17 @@
                             </page>
                             <page string="Driver Comments">
                                 <group>
-                                    <field name="comments"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/> 
+                                    <field name="comments"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/> 
                                 </group>
                             </page>
                             <page string="Tags">
                                 <group>
-                                    <field name="tag" widget="many2many_tags" options="{'color_field': 'color'}"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="tag" widget="many2many_tags" options="{'color_field': 'color'}"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                                 </group>
                             </page>
                             <page string="Passenger">
                                 <group>
-                                    <field name="passenger_ids"  attrs="{'readonly': [('status', 'in', ('unavailable','canceled'))]}"/>
+                                    <field name="passenger_ids"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                                 </group>
                             </page>
                             <page string="Comments for Driver">

@@ -1,4 +1,5 @@
 import datetime
+from selectors import EpollSelector
 
 from pkg_resources import require
 from odoo import models, fields, api
@@ -53,22 +54,20 @@ class CarPooling(models.Model):
          'The seat number cannot be negative!')
     ]
 
-    #TODO On write and On-delete and create api should be added to avoid inconsistency (e.g., what if we update the capacity while it is in full status?)
+    #On write and On-delete and create api should be added to avoid inconsistency (e.g., what if we update the capacity while it is in full status?)
     @api.model
     def create(self, vals):        
         if vals['capacity']==0:
             raise UserError("The number of availabe seat should be greater than zero!")
         # Then call super to execute the parent method
         return super(CarPooling,self).create(vals)
-    
-    #TODO the following function cannot set the state=new when all non-status offers are removed. Fix it though it is not generally required.
     @api.ondelete(at_uninstall=False)
     def _unlink_if_passenger_refused(self):
         if any(record.passenger_ids.status=="accepted" for record in self):
                 msg="There are some passengers in 'accepted' status for this trip. To delete the trip, please make sure you have refused all passenger book requests."   
                 print("Message:",msg)
                 raise UserError(msg)
-
+    # on_write for updating will be added here. (e.g., what if we update the capacity while it is in full status?)
     
     #TODO Book action with its button should be added such that it inserts the user to the passenger list
 
@@ -127,11 +126,16 @@ class CarPoolingPassenger(models.Model):
                 raise UserError("No passenger can be removed from a departed or canceled trip.")
         return True
     
-    # @api.ondelete(at_uninstall=False)
-    # def _unlink_if_passenger_refused(self):
-    #     if any(record.passenger_ids.status=="accepted" for record in self):
-    #             msg="There are some passengers in 'accepted' status for this trip. To delete the trip, please make sure you have refused all passenger book requests."   
-    #             print("Message:",msg)
-    #             raise UserError(msg)
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_passenger_refused(self):
+        for record in self:
+            if record.status=="accepted":
+                if record.trip_id.status!='departed':
+                    msg="The book has been accepted. To delete the book, first refuse the book requests."   
+                elif record.trip_id.status=='departed':
+                    msg="The trip is in departed status. An accepted book request for a departed trip cannot be removed."   
+                print("Message:",msg)
+                raise UserError(msg)
+        
 ##############################################################
 
