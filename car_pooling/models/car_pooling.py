@@ -1,7 +1,4 @@
 import datetime
-from selectors import EpollSelector
-
-from pkg_resources import require
 from odoo import models, fields, api
 from odoo.exceptions import UserError,ValidationError
 from  odoo.tools import float_utils
