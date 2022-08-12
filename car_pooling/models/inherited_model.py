@@ -1,3 +1,4 @@
+from email.policy import default
 from odoo import api,fields, models
 from odoo.exceptions import UserError,ValidationError
 
@@ -5,7 +6,10 @@ from odoo.exceptions import UserError,ValidationError
 class InheritedModel(models.Model):
     _inherit = "res.users"
     phone_number=fields.Char()
-    is_volunteer=fields.Boolean(string="Are you volunteer to participate in Car pooling?",require=True)
+    is_volunteer=fields.Selection(
+        string="Are you volunteer to participate in Car pooling?",
+        selection=[("no","No"),("yes","Yes")],
+        default="no")
     car_name=fields.Char(strting="Vehicle Name", required=True, default="My car name")
     Car_model=fields.Char(string="Vehicle Model", help="It is to specify the vehicle model like BMW 218i Gran Coupe")
     car_type=fields.Selection(

@@ -14,9 +14,9 @@
                     </group>
                 </xpath> 
                 <xpath expr="//page[@name='preferences']" position="before">
-                <!-- <xpath expr="//page[@name='account_security']" position="after"> -->
+                <!-- <xpath expr="//page[@name\='account_security']" position="after"> -->
             
-                    <page string="Vehicle Information"  attrs="{'invisible': [('is_volunteer', '=', False)]}"> 
+                    <page string="Vehicle Information"  attrs="{'invisible': [('is_volunteer', '=', 'no')]}"> 
                         <group>
                              <field name="car_name"/>
                              <!-- <field name="Car_model" attrs="{'invisible': [('is_volunteer', '=', 'True')]}"/> -->

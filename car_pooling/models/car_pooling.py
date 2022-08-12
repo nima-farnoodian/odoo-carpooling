@@ -22,6 +22,7 @@ class CarPooling(models.Model):
         string="Status",
         selection=[("available","Available"),("full","Full"),("unavailable","Unavailable"),("departed","Departed"),('canceled','Canceled')],
         default="available")
+    #TODO complete unavailable status
     # @api.depends('departure_date',"departure_time")
     # def _compute_unavailable_state(self):
     #     for record in self:
@@ -76,6 +77,14 @@ class CarPooling(models.Model):
         for record in self:
             record.available_seat = record.capacity- record.filled_seat
     
+    is_volunteer = fields.Char(compute="_is_volunteer")
+    @api.depends('driver')
+    def _is_volunteer(self):
+        print("printing self",self)
+        for record in self:
+            print("value", record.driver.is_volunteer)
+            record.is_volunteer = record.driver.is_volunteer
+
     car_name = fields.Char(compute="_car_name")
     @api.depends('driver')
     def _car_name(self):
@@ -182,17 +191,22 @@ class CarPooling(models.Model):
         ('seat_no_check', 'CHECK(capacity >= 0)',
          'The seat number cannot be negative!'),
         ('available_seat_check', 'CHECK(filled_seat <= capacity)',
-         "The capacity of the vehicle must be equal to or greater than the number of filled seats! To reduce the capacity, refuse some passengers' accepted requests.")
-    ]
+         "The capacity of the vehicle must be equal to or greater than the number of filled seats! To reduce the capacity, refuse some passengers' accepted requests."),
+        ]
 
-    @api.constrains('res_phone_number')
-    def _check_phone_number(self):
+
+    #  ('volunteer_check', 'CHECK(is_volunteer != Null)',
+    #      'You, as the driver, has not yet activated Car Pooling; thus you cannot add and share your trip. To activate Car Pooling, go to your account setting, and check volunteer box.'),
+    #      ('volunteer_check', 'CHECK(is_volunteer != False)',
+    #      'You, as the driver, has not yet activated Car Pooling; thus you cannot add and share your trip. To activate Car Pooling, go to your account setting, and check volunteer box.')
+
+    @api.constrains('is_volunteer')
+    def _check_volunteer(self):
         for record in self:
-            if record.phone_number!='':
-                if not str(record.phone_number).isdigit() or len(record.phone_number) != 10:
-                    raise ValidationError(("Cannot enter invalid phone number"))
+            if record.is_volunteer=="no":
+                msg='You, as the driver, has not yet activated Car Pooling feature; thus you cannot add and share your trip. To activate Car Pooling, go to your account setting, and check volunteer box.'
+                raise ValidationError(msg)
         return True
-
 
 #############################################################
 class CarPoolingTag(models.Model):
