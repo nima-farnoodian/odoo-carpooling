@@ -13,8 +13,7 @@ class CarPooling(models.Model):
     source_address=fields.Char(required=True)
     destination_city=fields.Char(required=True)
     destination_address=fields.Char(required=True)
-    departure_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
-    departure_time = fields.Float('Departure Time',required=True)
+    departure_date = fields.Datetime(string="Departure Date and Time", required=True)
     capacity=fields.Integer(string="Number of seats",required=True)
     filled_seat=fields.Integer(string="Number of filled seats",readonly=True)
     available_seat=fields.Integer(compute="_compute_available_seat", store=True, string="Available seats")
@@ -23,13 +22,21 @@ class CarPooling(models.Model):
         string="Status",
         selection=[("available","Available"),("full","Full"),("unavailable","Unavailable"),("departed","Departed"),('canceled','Canceled')],
         default="available")
+    # @api.depends('departure_date',"departure_time")
+    # def _compute_unavailable_state(self):
+    #     for record in self:
+    #         now =datetime.datetime.now()
+    #         if record.departure_date < now:
+    #             record.status = "unavailable"
+            
+            
+
+    
     comments=fields.Text(help="The comments for the trips")
     tag=fields.Many2many("car.pooling.tag",string="Tags")
     is_round_trip=fields.Boolean(string="Round Trip")
+    return_date = fields.Datetime(string="Return Date and Time")
 
-
-    return_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
-    return_time = fields.Float('Return Time',copy=False)
     # capacity_return=fields.Integer(string="Capacity for return", required=True)
     passenger_ids=fields.One2many("car.pooling.passenger","trip_id",string="Passengers")
 
@@ -47,12 +54,63 @@ class CarPooling(models.Model):
     def _compute_current_user_is_passenger(self):
         for record in self:
             record.current_user_is_passenger = (self.env.user in record.passenger_ids.passenger)
-    
+
+    current_user_book_status = fields.Char(compute="_compute_current_user_book_status",string="Booking status")
+    def _compute_current_user_book_status(self):
+        for record in self:
+            record.current_user_book_status="Undecided"
+            query ="SELECT * FROM car_pooling_passenger where passenger=" + str(self.env.user.id) + " and trip_id=" + str(record.id)
+            self.env.cr.execute(query)
+            result=self.env.cr.fetchall()
+            print("Result for status:",result)
+            if len(result)>0:
+                if result[0][3]=="accepted":
+                    record.current_user_book_status="Accepted"
+                if result[0][3]=="refused":
+                    record.current_user_book_status="Refused" 
+                else:
+                     record.current_user_book_status="Undecided"
 
     @api.depends("capacity","filled_seat")
     def _compute_available_seat(self):
         for record in self:
             record.available_seat = record.capacity- record.filled_seat
+    
+    car_name = fields.Char(compute="_car_name")
+    @api.depends('driver')
+    def _car_name(self):
+        for record in self:
+            record.car_name = record.driver.car_name
+    
+    Car_model = fields.Char(compute="_car_model")
+    @api.depends('driver')
+    def _car_model(self):
+        for record in self:
+            record.Car_model = record.driver.Car_model
+    
+    car_type = fields.Char(compute="_car_type")
+    @api.depends('driver')
+    def _car_type(self):
+        for record in self:
+            record.car_type = record.driver.car_type
+
+    car_plate_number = fields.Char(compute="_car_plate_number")
+    @api.depends('driver')
+    def _car_plate_number(self):
+        for record in self:
+            record.car_plate_number = record.driver.car_plate_number
+
+    car_color = fields.Char(compute="_car_color")
+    @api.depends('driver')
+    def _car_color(self):
+        for record in self:
+            record.car_color = record.driver.car_color
+
+    Car_image = fields.Binary(attachment=True,store=True,compute="_car_image")
+    @api.depends('driver')
+    def _car_image(self):
+        for record in self:
+            record.Car_image = record.driver.Car_image
 
  
     def cancel_action(self):
@@ -126,6 +184,15 @@ class CarPooling(models.Model):
         ('available_seat_check', 'CHECK(filled_seat <= capacity)',
          "The capacity of the vehicle must be equal to or greater than the number of filled seats! To reduce the capacity, refuse some passengers' accepted requests.")
     ]
+
+    @api.constrains('res_phone_number')
+    def _check_phone_number(self):
+        for record in self:
+            if record.phone_number!='':
+                if not str(record.phone_number).isdigit() or len(record.phone_number) != 10:
+                    raise ValidationError(("Cannot enter invalid phone number"))
+        return True
+
 
 #############################################################
 class CarPoolingTag(models.Model):

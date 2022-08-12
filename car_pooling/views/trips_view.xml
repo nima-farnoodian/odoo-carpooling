@@ -19,25 +19,20 @@
 
                 <button name='book_or_unbook' string='Book' type="object"  attrs="{'invisible':['|','|', ('current_user_is_passenger', '=', True), ('is_current_user_driver','=',True),('status', 'in', ('departed','unavailable','canceled'))]}" class="oe_highlight"/>
                 <button name='book_or_unbook' string='Unbook' type="object" attrs="{'invisible':['|','|', ('current_user_is_passenger', '=', False), ('is_current_user_driver','=',True),('status', 'in', ('departed','unavailable','canceled'))]}" class="btn-danger"/>
-               
                 <field name="driver"/>
                 <field name="available_seat"/>
                 <field name="source_city"/>
                 <field name="source_address"/>
                 <field name="departure_date" />
-                <field name="departure_time"/>
                 <field name="destination_city"/>
                 <field name="destination_address"/>
                 <field name="status"/>
                 <field name="tag" optional="1"/>
                 <field name="is_round_trip"/>
                 <field name="return_date" />           
-                <field name="return_time"/>
             </tree>
         </field>
     </record>
-
-
 
        <record id="trip_form" model="ir.ui.view">
         <field name="name">Trip Form</field>
@@ -45,9 +40,11 @@
         <field name="arch" type="xml">
             <form string="Form Viwe">
                 <field name="is_current_user_driver" invisible='1'/>
+                <field name="current_user_is_passenger" invisible='1'/>
+
                 <header>
-                        <button name="depart_action" type="object" string="Departed" attrs="{'invisible': [('status', '=', 'canceled')]}"/>
-                        <button name="cancel_action" type="object" string="Cancel" attrs="{'invisible': [('status', '=', 'departed')]}"/> 
+                        <button name="depart_action" type="object" string="Departed" attrs="{'invisible': ['|',('status', '=', 'canceled'),('is_current_user_driver','=',False)]}"/>
+                        <button name="cancel_action" type="object" string="Cancel" attrs="{'invisible': ['|',('status', '=', 'departed'),('is_current_user_driver','=',False)]}"/> 
                         <field name="status" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -59,6 +56,7 @@
                             <field name="driver"/>
                         </group>
                         <group>
+                            <field name='current_user_book_status' attrs="{'invisible':['|', ('current_user_is_passenger', '=', False), ('is_current_user_driver','=',True)]}" />
                             <field name="capacity"  attrs="{'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>
                             <field name="available_seat"  readonly='1'/>
                             <field name="is_round_trip"  attrs="{'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>
@@ -68,32 +66,26 @@
                             <page string="Trip Information">
                                 <group >
                                     <field name="departure_date"  attrs="{'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>
-                                    <field name="departure_time" widget="float_time" attrs="{'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>
                                     <field name="source_city"  attrs="{'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>
                                     <field name="source_address" attrs="{'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>
                                     <field name="destination_city" attrs="{'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>
                                     <field name="destination_address"  attrs="{'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>
                                     <field name="return_date"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>           
-                                    <field name="return_time" widget="float_time" attrs="{'invisible': [('is_round_trip', '=', False)],'readonly': ['|',('status', 'in', ('departed','unavailable','canceled')),('is_current_user_driver','=',False)]}"/>           
                                 </group>
            
                             </page>
-                            <page string="Driver Information">
+                            <page string="Vehicle Information">
                                 <group>
-                                    <h1>
-                                        <field name="driver" readonly='1'>
-                                            <tree>
-                                                <field name="phone_number"/>
-                                                <field name="car_name"/>
-                                                <field name="Car_model"/>
-                                                <field name="car_type"/>
-                                                <field name="car_plate_number"/>
-                                            </tree>
-                                        </field>
-                                       Driver Information will appear here
-                                    </h1>
-                                    <!-- <field name="salesperson"  attrs="{'readonly': [('state', 'in', ('sold','canceled'))]}"/>
-                                    <field name="buyer"  attrs="{'readonly': [('state', 'in', ('sold','canceled'))]}"/> -->
+                                    <group>
+                                        <field name="car_name" readonly='1'/>
+                                        <field name="Car_model" readonly='1'/>
+                                        <field name="car_type" readonly='1'/>
+                                        <field name="car_plate_number" readonly='1'/>
+                                        <field name="car_color"  widget='color' readonly='1'/>
+                                    </group>
+                                    <group>
+                                        <field name="Car_image" widget="image" class="oe_avatar" options='{"preview_image": "Car_image"}' readonly='1'/>
+                                    </group>
                                 </group>
                             </page>
                             <page string="Driver Comments">
