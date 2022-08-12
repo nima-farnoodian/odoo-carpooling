@@ -32,7 +32,7 @@
                             <field name="passenger"/>
                         </group>
                         <group>
-                            <field name="status"/>
+                            <field name="status" readonly='1'/>
                         </group>
                     </sheet>
                 </form>

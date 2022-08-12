@@ -15,7 +15,7 @@
         <field name="arch" type="xml">
             <tree decoration-success="status in ('available')"  decoration-warning="status=='full'" decoration-muted="status=='departed'"  decoration-bf="status=='available'" decoration-danger="status=='canceled'">
                 <field name="driver"/>
-                <field name="capacity"/>
+                <field name="available_seat"/>
                 <field name="source_city"/>
                 <field name="source_address"/>
                 <field name="departure_date" />
@@ -54,6 +54,8 @@
                         </group>
                         <group>
                             <field name="capacity"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
+                            <field name="filled_seat"  readonly='1'/>
+                            <field name="available_seat"  readonly='1'/>
                             <field name="is_round_trip"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                         </group>
                         <!-- <separator string="Requirements"/> -->
