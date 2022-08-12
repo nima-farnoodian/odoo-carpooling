@@ -17,20 +17,37 @@ class CarPooling(models.Model):
     departure_time = fields.Float('Departure Time',required=True)
     capacity=fields.Integer(string="Number of seats",required=True)
     filled_seat=fields.Integer(string="Number of filled seats",readonly=True)
-    available_seat=fields.Integer(compute="_compute_available_seat", store=True, string="available seats")
+    available_seat=fields.Integer(compute="_compute_available_seat", store=True, string="Available seats")
 
     status=fields.Selection(
         string="Status",
         selection=[("available","Available"),("full","Full"),("unavailable","Unavailable"),("departed","Departed"),('canceled','Canceled')],
         default="available")
-    comments=fields.Char(help="The comments for the trips")
+    comments=fields.Text(help="The comments for the trips")
     tag=fields.Many2many("car.pooling.tag",string="Tags")
     is_round_trip=fields.Boolean(string="Round Trip")
+
+
     return_date=fields.Date(copy=False,default=lambda self: fields.Datetime.now())
     return_time = fields.Float('Return Time',copy=False)
     # capacity_return=fields.Integer(string="Capacity for return", required=True)
     passenger_ids=fields.One2many("car.pooling.passenger","trip_id",string="Passengers")
 
+
+    is_current_user_driver = fields.Boolean(compute="_is_current_user_driver")
+    @api.depends('driver')
+    # adopted from https://github.com/hlibioulle/OpenWeek-odoo-carpooling/blob/main/carpooling/models/vehicle_trip.py
+    def _is_current_user_driver(self):
+        for record in self:
+            record.is_current_user_driver = (record.driver == self.env.user)
+
+    current_user_is_passenger = fields.Boolean(compute="_compute_current_user_is_passenger")
+    @api.depends("passenger_ids")
+    # adopted from https://github.com/hlibioulle/OpenWeek-odoo-carpooling/blob/main/carpooling/models/vehicle_trip.py
+    def _compute_current_user_is_passenger(self):
+        for record in self:
+            record.current_user_is_passenger = (self.env.user in record.passenger_ids.passenger)
+    
 
     @api.depends("capacity","filled_seat")
     def _compute_available_seat(self):
@@ -53,14 +70,6 @@ class CarPooling(models.Model):
                 raise UserError("The canceled trip cannot be in 'departed' status")
             else:
                 record.status="departed"
-
-    _sql_constraints = [
-        ('seat_no_check', 'CHECK(capacity >= 0)',
-         'The seat number cannot be negative!'),
-        ('available_seat_check', 'CHECK(filled_seat <= capacity)',
-         "The capacity of the vehicle must be equal to or greater than the number of filled seats! To reduce the capacity, refuse some passengers' accepted requests.")
-    ]
-
     #On write and On-delete and create api should be added to avoid inconsistency (e.g., what if we update the capacity while it is in full status?)
     @api.model
     def create(self, vals):        
@@ -95,6 +104,29 @@ class CarPooling(models.Model):
         super(CarPooling,self).write(vals)
     
     #TODO Book action with its button should be added such that it inserts the user to the passenger list
+    def book_or_unbook(self):
+        for record in self:
+            if self.env.user in record.passenger_ids.passenger:
+                query ="SELECT * FROM car_pooling_passenger where passenger=" + str(self.env.user.id) + " and trip_id=" + str(record.id)
+                self.env.cr.execute(query)
+                result=self.env.cr.fetchall()
+                if result[0][3]=="accepted":
+                    msg="You cannot unbook the trip because the book has been accepted by the driver. Contact " + str(record.driver.name) + " at " + str(record.driver.email) + " or by " + str(record.driver.phone_number) + " to ask booking refusal."
+                    raise UserError(msg)
+                query_exc="delete from car_pooling_passenger where passenger=" + str(self.env.user.id) + " and trip_id=" + str(record.id)
+            else:
+                query_exc="INSERT INTO car_pooling_passenger (passenger, trip_id) VALUES ("+ str(self.env.user.id) +","+ str(record.id)+");"
+            self.env.cr.execute(query_exc)
+
+        return True
+
+    _sql_constraints = [
+        ('seat_no_check', 'CHECK(capacity >= 0)',
+         'The seat number cannot be negative!'),
+        ('available_seat_check', 'CHECK(filled_seat <= capacity)',
+         "The capacity of the vehicle must be equal to or greater than the number of filled seats! To reduce the capacity, refuse some passengers' accepted requests.")
+    ]
+
 #############################################################
 class CarPoolingTag(models.Model):
     _name="car.pooling.tag"
@@ -152,7 +184,7 @@ class CarPoolingPassenger(models.Model):
         for record in self:
             if record.status=="accepted":
                 if record.trip_id.status!='departed':
-                    msg="The book has been accepted. To delete the book, first refuse the book requests."   
+                    msg="The book has been accepted. To delete the book, the book request must be first refused by the drive. If you are not the drive, please contact him/her to refuse your book request."   
                 elif record.trip_id.status=='departed':
                     msg="The trip is in departed status. An accepted book request for a departed trip cannot be removed."   
                 print("Message:",msg)

@@ -14,6 +14,13 @@
         <field name="model">car.pooling</field>
         <field name="arch" type="xml">
             <tree decoration-success="status in ('available')"  decoration-warning="status=='full'" decoration-muted="status=='departed'"  decoration-bf="status=='available'" decoration-danger="status=='canceled'">
+               <field name="current_user_is_passenger"/>
+                <!-- <button name='book_or_cancel' string='Book' type="object"  attrs="{'invisible':['|', '|', ('current_user_is_passenger', '=', True), ('status', 'not in', ('full','departed','unavailable','canceled'))]}" class="oe_highlight"/>
+                <button name='book_or_cancel' string='Unbook' type="object"  attrs="{'invisible':['|', ('current_user_is_passenger', '=', False), ('expired', '=', True)]}" class="btn-danger"/> -->
+                
+                <button name='book_or_unbook' string='Book' type="object"  class="oe_highlight"/>
+                <button name='book_or_unbook' string='Unbook' type="object" class="btn-danger"/>
+               
                 <field name="driver"/>
                 <field name="available_seat"/>
                 <field name="source_city"/>
@@ -54,7 +61,6 @@
                         </group>
                         <group>
                             <field name="capacity"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
-                            <field name="filled_seat"  readonly='1'/>
                             <field name="available_seat"  readonly='1'/>
                             <field name="is_round_trip"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                         </group>
@@ -69,7 +75,7 @@
                                     <field name="destination_city" attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                                     <field name="destination_address"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                                     <field name="return_date"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('departed','unavailable','canceled'))]}"/>           
-                                    <field name="return_time"  attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('departed','unavailable','canceled'))]}"/>           
+                                    <field name="return_time" widget="float_time" attrs="{'invisible': [('is_round_trip', '=', False)],'readonly':  [('status', 'in', ('departed','unavailable','canceled'))]}"/>           
                                 </group>
            
                             </page>
