@@ -17,7 +17,10 @@ class CarPooling(models.Model):
     capacity=fields.Integer(string="Number of seats",required=True)
     filled_seat=fields.Integer(string="Number of filled seats",readonly=True)
     available_seat=fields.Integer(compute="_compute_available_seat", store=True, string="Available seats")
-
+    @api.depends("capacity","filled_seat")
+    def _compute_available_seat(self):
+        for record in self:
+            record.available_seat = record.capacity- record.filled_seat
     status=fields.Selection(
         string="Status",
         selection=[("available","Available"),("full","Full"),("unavailable","Unavailable"),("departed","Departed"),('canceled','Canceled')],
@@ -71,12 +74,7 @@ class CarPooling(models.Model):
                     record.current_user_book_status="Refused" 
                 else:
                      record.current_user_book_status="Undecided"
-
-    @api.depends("capacity","filled_seat")
-    def _compute_available_seat(self):
-        for record in self:
-            record.available_seat = record.capacity- record.filled_seat
-    
+   
     is_volunteer = fields.Char(compute="_is_volunteer")
     @api.depends('driver')
     def _is_volunteer(self):
@@ -215,7 +213,6 @@ class CarPoolingTag(models.Model):
     _order = "name"
     name=fields.Char(required=True)
     color=fields.Integer()
-
     _sql_constraints = [
        ('unique_tag', 'unique(name)', 'The tag name should be unique!')
     ]
@@ -231,7 +228,14 @@ class CarPoolingPassenger(models.Model):
     status=fields.Selection(string="Status",
         selection=[("accepted","Accepted"),("refused","Refused")],
         help="The status of the trip offer")
-
+    accept_count=fields.Integer()
+    refuse_count=fields.Integer()
+    _sql_constraints = [
+        ('accept_count_check', 'CHECK(accept_count <= 2)',
+         'You can only accept a booked trip for a passenger twice!'),
+        ('refuse_count_check', 'CHECK(refuse_count <= 2)',
+         "You can only refuse a booked trip for a passenger twice!"),
+        ]
 
     #TODO complete the following functions 
     def action_accept(self):
@@ -241,6 +245,7 @@ class CarPoolingPassenger(models.Model):
                 if record.trip_id.filled_seat<record.trip_id.capacity:
                     record.trip_id.filled_seat=record.trip_id.filled_seat+1
                     record.status="accepted"
+                    record.accept_count+=1
                     if  record.trip_id.filled_seat==record.trip_id.capacity:
                         record.trip_id.status="full"
                 else:
@@ -254,6 +259,7 @@ class CarPoolingPassenger(models.Model):
         for record in self:
             if record.trip_id.status!="departed" and record.trip_id.status!="canceled":
                 record.status = "refused"
+                record.refuse_count+=1
                 record.trip_id.filled_seat=record.trip_id.filled_seat-1
                 record.trip_id.status="available"
             else:
@@ -265,7 +271,7 @@ class CarPoolingPassenger(models.Model):
         for record in self:
             if record.status=="accepted":
                 if record.trip_id.status!='departed':
-                    msg="The book has been accepted. To delete the book, the book request must be first refused by the drive. If you are not the drive, please contact him/her to refuse your book request."   
+                    msg="The book has been accepted. To delete the book, the book request must be first refused by the drive."   
                 elif record.trip_id.status=='departed':
                     msg="The trip is in departed status. An accepted book request for a departed trip cannot be removed."   
                 print("Message:",msg)

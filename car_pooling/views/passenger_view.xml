@@ -12,7 +12,7 @@
             <field name="name">Passenger List</field>
             <field name="model">car.pooling.passenger</field>
             <field name="arch" type="xml">
-                <tree decoration-success="status=='accepted'" decoration-danger="status=='refused'">
+                <tree create="false" edit="false" decoration-success="status=='accepted'" decoration-danger="status=='refused'">
                     <field name="passenger"/>
                     <button name="action_accept" string="Accept" type="object" icon="fa-check" attrs="{'invisible': [('status', 'in', ('accepted'))]}"/>
                     <button name="action_refuse" string="Refuse" type="object" icon="fa-times" attrs="{'invisible': [('status', 'in', ('refused'))]}"/>
