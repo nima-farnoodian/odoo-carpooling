@@ -35,7 +35,15 @@ class CarPooling(models.Model):
                 record.name = "From " + str(record.source_city) + " to " + str(record.destination_city)
             else:
                 record.name = ""
-    
+
+
+    driver_uid = fields.Integer(compute="_get_driver_uid", store=True)
+    @api.depends('driver')
+    # adopted from https://github.com/hlibioulle/OpenWeek-odoo-carpooling/blob/main/carpooling/models/vehicle_trip.py
+    def _get_driver_uid(self):
+        for record in self:
+            record.driver_uid = record.driver.id
+
     #TODO complete unavailable status
     # @api.depends('departure_date',"departure_time")
     # def _compute_unavailable_state(self):
@@ -73,17 +81,11 @@ class CarPooling(models.Model):
     def _compute_current_user_book_status(self):
         for record in self:
             record.current_user_book_status="Undecided"
-            query ="SELECT * FROM car_pooling_passenger where passenger=" + str(self.env.user.id) + " and trip_id=" + str(record.id)
-            self.env.cr.execute(query)
-            result=self.env.cr.fetchall()
-            print("Result for status:",result)
-            if len(result)>0:
-                if result[0][3]=="accepted":
-                    record.current_user_book_status="Accepted"
-                if result[0][3]=="refused":
-                    record.current_user_book_status="Refused" 
-                else:
-                     record.current_user_book_status="Undecided"
+            for record2 in record.passenger_ids:
+                if record2.passenger==self.env.user:
+                    if record2.status=="accepted" or record2.status=="refused":
+                            record.current_user_book_status=record2.status.capitalize()
+                    break
    
     is_volunteer = fields.Char(compute="_is_volunteer")
     @api.depends('driver')
@@ -190,7 +192,7 @@ class CarPooling(models.Model):
                     raise UserError(msg)
                 query_exc="delete from car_pooling_passenger where passenger=" + str(self.env.user.id) + " and trip_id=" + str(record.id)
             else:
-                query_exc="INSERT INTO car_pooling_passenger (passenger, trip_id) VALUES ("+ str(self.env.user.id) +","+ str(record.id)+");"
+                query_exc="INSERT INTO car_pooling_passenger (passenger, trip_id,trip_date,trip_driver,is_round_trip) VALUES ("+ str(self.env.user.id) +","+ str(record.id)+ ",'" + str(record.departure_date) + "','"+ str(record.driver.name) + "'," +str(record.is_round_trip)+");"
             self.env.cr.execute(query_exc)
 
         return True
@@ -200,23 +202,9 @@ class CarPooling(models.Model):
          'The seat number cannot be negative!'),
         ('available_seat_check', 'CHECK(filled_seat <= capacity)',
          "The capacity of the vehicle must be equal to or greater than the number of filled seats! To reduce the capacity, refuse some passengers' accepted requests."),
-        ]
-
-
-    #  ('volunteer_check', 'CHECK(is_volunteer != Null)',
-    #      'You, as the driver, has not yet activated Car Pooling; thus you cannot add and share your trip. To activate Car Pooling, go to your account setting, and check volunteer box.'),
-    #      ('volunteer_check', 'CHECK(is_volunteer != False)',
-    #      'You, as the driver, has not yet activated Car Pooling; thus you cannot add and share your trip. To activate Car Pooling, go to your account setting, and check volunteer box.')
-
-    @api.constrains('is_volunteer')
-    def _check_volunteer(self):
-        for record in self:
-            if record.is_volunteer=="no":
-                msg='You, as the driver, has not yet activated Car Pooling feature; thus you cannot add and share your trip. To activate Car Pooling, go to your account setting, and check volunteer box.'
-                raise ValidationError(msg)
-        return True
-
-        
+        ('can_create_check', 'CHECK(is_volunteer == "yes")',
+         'You, as the driver, has not yet activated Car Pooling feature; thus you cannot add and share your trip. To activate Car Pooling, go to your account setting, and check volunteer box.'),
+        ]        
 
 #############################################################
 class CarPoolingTag(models.Model):
@@ -240,8 +228,14 @@ class CarPoolingPassenger(models.Model):
     status=fields.Selection(string="Status",
         selection=[("accepted","Accepted"),("refused","Refused")],
         help="The status of the trip offer")
-    accept_count=fields.Integer()
-    refuse_count=fields.Integer()
+    accept_count=fields.Integer(readonly=True, string="Number of Refusals")
+    refuse_count=fields.Integer(readonly=True, string="Number of Acceptances")
+    
+    trip_date=fields.Datetime(string="Departure Date and Time",readonly=True)
+    trip_driver=fields.Char(string="Driver",readonly=True)
+    is_round_trip=fields.Boolean(string="Round Trip",readonly=True)
+
+
     _sql_constraints = [
         ('accept_count_check', 'CHECK(accept_count <= 2)',
          'You can only accept a booked trip for a passenger twice!'),
@@ -316,16 +310,6 @@ class CarPoolingPassengerComments(models.Model):
         for record in self:
             record.passenger_uid = record.passenger.id
     
-    # def create(self, vals):
-    #     print("Vlas for comments",vals)
-    #     query ="SELECT * FROM car_pooling_comment where passenger_uid="+str(vals['passenger_uid'])+" and trip_id="+str(vals['trip_id'])
-    #     self.env.cr.execute(query)
-    #     result=self.env.cr.fetchall()
-    #     if len(result)>=1: 
-    #         raise UserError("You can only pose one comment for a trip!")
-    #     # Then call super to execute the parent method
-    #     return super(CarPoolingPassengerComments,self).create(vals)
-
     @api.ondelete(at_uninstall=False)
     def _unlink_if_the_same_passenger(self):
         for record in self:

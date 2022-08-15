@@ -14,12 +14,9 @@
                     </group>
                 </xpath> 
                 <xpath expr="//page[@name='preferences']" position="before">
-                <!-- <xpath expr="//page[@name\='account_security']" position="after"> -->
-            
                     <page string="Vehicle Information"  attrs="{'invisible': [('is_volunteer', '=', 'no')]}"> 
                         <group>
                              <field name="car_name"/>
-                             <!-- <field name="Car_model" attrs="{'invisible': [('is_volunteer', '=', 'True')]}"/> -->
                              <field name="Car_model"/>
                              <field name="car_type"/>
                              <field name="car_plate_number"/>
@@ -28,6 +25,21 @@
                         <group>
                             <field name="Car_image" widget="image" class="oe_avatar" options='{"preview_image": "Car_image"}'/>
                         </group>
+                    </page>
+                    <page string="My Trips as Driver">
+                        <field name="trip_ids" readonly='1'/>
+                        
+                    </page>
+                    <page string="My Booked Trips as Passenger">
+                        <field name="my_book_trip_ids" readonly="1">                            
+                            <tree create="false" edit="false" decoration-success="status=='accepted'" decoration-danger="status=='refused'">
+                                <field name="trip_id"/>
+                                <field name="trip_driver"/>
+                                <field name="trip_date"/>
+                                <field name="status"/>
+                                <field name="is_round_trip" />
+                            </tree>
+                        </field>
                     </page>
                 </xpath> 
             </field>

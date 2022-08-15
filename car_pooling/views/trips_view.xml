@@ -6,12 +6,12 @@
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_availability': True, 'search_default_current': True}</field>
     </record>
-    
+
     <record id="car_pooling_view_tree" model="ir.ui.view">
         <field name="name">Trips</field>
         <field name="model">car.pooling</field>
         <field name="arch" type="xml">
-            <tree decoration-success="status in ('available')"  decoration-warning="status=='full'" decoration-muted="status=='departed'"  decoration-bf="status=='available'" decoration-danger="status=='canceled'">
+            <tree decoration-success="status in ('available')"  decoration-warning="status=='full'" decoration-muted="status in ('departed','unavailable')"  decoration-bf="status=='available'" decoration-danger="status=='canceled'">
                 <field name="current_user_is_passenger" invisible='1'/>
                 <field name="is_current_user_driver" invisible='1'/>
                 <button name='book_or_unbook' string='Book' type="object"  attrs="{'invisible':['|','|', ('current_user_is_passenger', '=', True), ('is_current_user_driver','=',True),('status', 'in', ('departed','unavailable','canceled'))]}" class="oe_highlight"/>
@@ -100,7 +100,7 @@
                                     <field name="passenger_ids"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                                 </group>
                             </page>
-                            <page string="Passenger Comments" attrs="{'invisible': ['&amp;',('is_current_user_driver', '=', False),('current_user_is_passenger', '=', False)]}">
+                            <page string="Passenger Comments" attrs="{'invisible': ['&amp;','&amp;',('is_current_user_driver', '=', False),('current_user_book_status', '!=', 'Accepted'),('current_user_book_status', '=','Undecided')]}">
                                 <group >
                                         <field name="comments_ids"  attrs="{'readonly': ['|',('status', 'in', ('unavailable','canceled')),('is_current_user_driver','=',True)]}"/>
                                 </group>
@@ -132,12 +132,15 @@
                 <filter string="Departed Trips" name='departed' domain="[('status','=','departed')]"/>
                 <filter string="Many Seats" name='manySeats' domain="[('available_seat','>',2)]"/>
                 <group expand="1" string="Group By">
+                    <filter string="Group by Driver" name="Driver_groupby" context="{'group_by':'driver', 'residual_visible':True}"/>
                     <filter string="Group by Source City" name="SourceCity_groupby" context="{'group_by':'source_city', 'residual_visible':True}"/>
                     <filter string="Group by Destination City" name="DestinationCity_groupby" context="{'group_by':'destination_city', 'residual_visible':True}"/>
                 </group>
             </search>
         </field>
     </record>
+
+
 
 
 </odoo>
