@@ -15,7 +15,7 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
-    'category': 'Uncategorized',
+    'category': 'Localization',
     'version': '0.1',
 
     # any module necessary for this one to work correctly
@@ -30,6 +30,7 @@
         'views/trips_view.xml',
         'views/trips_tags_views.xml',
         'views/passenger_view.xml',
+        'views/passenger_comment_view.xml',
         'views/trips_menu.xml',
     ],
     # only loaded in demonstration mode

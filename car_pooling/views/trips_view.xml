@@ -46,7 +46,7 @@
                 </header>
                 <sheet>
                     <h1>
-                        My new trip 
+                        <field name="name" />
                     </h1>
                     <group>
                         <group>
@@ -100,11 +100,9 @@
                                     <field name="passenger_ids"  attrs="{'readonly': [('status', 'in', ('departed','unavailable','canceled'))]}"/>
                                 </group>
                             </page>
-                            <page string="Comments for Driver">
-                                <group  attrs="{'readonly': [('is_current_user_driver','=',True)]}">
-                                    <h1>
-                                       Comments for Driver will appear here
-                                    </h1>
+                            <page string="Passenger Comments" attrs="{'invisible': ['&amp;',('is_current_user_driver', '=', False),('current_user_is_passenger', '=', False)]}">
+                                <group >
+                                        <field name="comments_ids"  attrs="{'readonly': ['|',('status', 'in', ('unavailable','canceled')),('is_current_user_driver','=',True)]}"/>
                                 </group>
                             </page>
                         </notebook>
@@ -115,7 +113,6 @@
         </field>
     </record>
 
-
     <record id="car_pooling_search" model="ir.ui.view">
         <field name="name">Car Pooling Search</field>
         <field name="model">car.pooling</field>
@@ -123,7 +120,7 @@
             <search string="Trip Search">
                 <field name="driver" string="Driver Name" />
                 <field name="departure_date" string="Departure Date and Time."/>
-                <field name="source_city" string="DWWWWepart from City" />
+                <field name="source_city" string="Depart from City" />
                 <field name="source_address" string="Depart from street" />
                 <field name="destination_city" string="Arrive in City"/>
                 <field name="destination_city" string="Arrive in street"/>

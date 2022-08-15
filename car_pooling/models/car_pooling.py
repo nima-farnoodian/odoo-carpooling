@@ -1,4 +1,5 @@
 import datetime
+from email import message
 from odoo import models, fields, api
 from odoo.exceptions import UserError,ValidationError
 from  odoo.tools import float_utils
@@ -25,6 +26,16 @@ class CarPooling(models.Model):
         string="Status",
         selection=[("available","Available"),("full","Full"),("unavailable","Unavailable"),("departed","Departed"),('canceled','Canceled')],
         default="available")
+
+    name=fields.Char(compute="_compute_name")
+    @api.depends('source_city',"destination_city")
+    def _compute_name(self):
+        for record in self:
+            if record.source_city and record.destination_city:
+                record.name = "From " + str(record.source_city) + " to " + str(record.destination_city)
+            else:
+                record.name = ""
+    
     #TODO complete unavailable status
     # @api.depends('departure_date',"departure_time")
     # def _compute_unavailable_state(self):
@@ -34,15 +45,14 @@ class CarPooling(models.Model):
     #             record.status = "unavailable"
             
             
-
-    
     comments=fields.Text(help="The comments for the trips")
     tag=fields.Many2many("car.pooling.tag",string="Tags")
     is_round_trip=fields.Boolean(string="Round Trip")
     return_date = fields.Datetime(string="Return Date and Time")
 
-    # capacity_return=fields.Integer(string="Capacity for return", required=True)
     passenger_ids=fields.One2many("car.pooling.passenger","trip_id",string="Passengers")
+
+    comments_ids=fields.One2many("car.pooling.comment","trip_id",string="Comments")
 
 
     is_current_user_driver = fields.Boolean(compute="_is_current_user_driver")
@@ -206,6 +216,8 @@ class CarPooling(models.Model):
                 raise ValidationError(msg)
         return True
 
+        
+
 #############################################################
 class CarPoolingTag(models.Model):
     _name="car.pooling.tag"
@@ -246,6 +258,8 @@ class CarPoolingPassenger(models.Model):
                     record.trip_id.filled_seat=record.trip_id.filled_seat+1
                     record.status="accepted"
                     record.accept_count+=1
+                    #TODO fix the notiification issue
+                    # record.passenger.user_id.notify_success(message="You booked trip accepted by the driver.")
                     if  record.trip_id.filled_seat==record.trip_id.capacity:
                         record.trip_id.status="full"
                 else:
@@ -279,3 +293,43 @@ class CarPoolingPassenger(models.Model):
         
 ##############################################################
 
+# A model for driver-trip-passanger message should be added
+AVAILABLE_PRIORITIES = [
+    ('0', 'Very Low'),
+    ('1', 'Low'),
+    ('2', 'Normal'),
+    ('3', 'High'),
+    ('4', 'Very High')]
+    
+class CarPoolingPassengerComments(models.Model):
+    _name = "car.pooling.comment"
+    _description = "This model is for storing the comments written about a trip"
+    _order = "id desc"
+    passenger= fields.Many2one('res.users',required=True,readonly=True, string='Passenger', index=True, tracking=True, default=lambda self: self.env.user)
+    trip_id=fields.Many2one('car.pooling',string="Trip",ondelete ='cascade')
+    comment=fields.Text()
+    trip_star=fields.Selection(AVAILABLE_PRIORITIES, select=True,string="Star")
+
+    passenger_uid = fields.Integer(compute="_get_passenger_uid", store=True)
+    @api.depends('passenger')
+    def _get_passenger_uid(self):
+        for record in self:
+            record.passenger_uid = record.passenger.id
+    
+    # def create(self, vals):
+    #     print("Vlas for comments",vals)
+    #     query ="SELECT * FROM car_pooling_comment where passenger_uid="+str(vals['passenger_uid'])+" and trip_id="+str(vals['trip_id'])
+    #     self.env.cr.execute(query)
+    #     result=self.env.cr.fetchall()
+    #     if len(result)>=1: 
+    #         raise UserError("You can only pose one comment for a trip!")
+    #     # Then call super to execute the parent method
+    #     return super(CarPoolingPassengerComments,self).create(vals)
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_the_same_passenger(self):
+        for record in self:
+            if record.passenger!=self.env.user:
+                msg="You cannot remove somebody else's comment"   
+                print("Message:",msg)
+                raise UserError(msg)
