@@ -147,12 +147,11 @@ class CarPooling(models.Model):
                 raise UserError("The canceled trip cannot be in 'departed' status")
             else:
                 record.status="departed"
-    #On write and On-delete and create api should be added to avoid inconsistency (e.g., what if we update the capacity while it is in full status?)
+    #On write and On-delete and create api to avoid inconsistency (e.g., what if we update the capacity while it is in full status?)
     @api.model
     def create(self, vals):        
         if vals['capacity']==0:
             raise UserError("The Number of seats (Vehicle Capacity) should be greater than zero!")
-        # Then call super to execute the parent method
         return super(CarPooling,self).create(vals)
     @api.ondelete(at_uninstall=False)
     def _unlink_if_passenger_refused(self):
@@ -180,7 +179,7 @@ class CarPooling(models.Model):
                 vals["status"]='available'
         super(CarPooling,self).write(vals)
     
-    #TODO Book action with its button should be added such that it inserts the user to the passenger list
+    #Book and unbook action with its button such that it inserts the user to the passenger list or removes it from the list
     def book_or_unbook(self):
         for record in self:
             if self.env.user in record.passenger_ids.passenger:
@@ -243,7 +242,6 @@ class CarPoolingPassenger(models.Model):
          "You can only refuse a booked trip for a passenger twice!"),
         ]
 
-    #TODO complete the following functions 
     def action_accept(self):
         #TODO add automatic odoo message (Accpeted) sent to the passanger
         for record in self:
