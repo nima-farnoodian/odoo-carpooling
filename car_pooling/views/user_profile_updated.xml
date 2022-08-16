@@ -13,7 +13,7 @@
                         <field name="is_volunteer" />
                     </group>
                 </xpath> 
-                <xpath expr="//page[@name='preferences']" position="before">
+                <xpath expr="//page[@name='preferences']" position="after">
                     <page string="Vehicle Information"  attrs="{'invisible': [('is_volunteer', '=', 'no')]}"> 
                         <group>
                              <field name="car_name"/>

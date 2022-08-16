@@ -1,5 +1,5 @@
 <odoo>
-    <menuitem name="Car pooling" id="menu_root2">
+    <menuitem name="Carpooling" id="menu_root2">
         <menuitem name="Trips" id="car_pooling">
             <menuitem name="Show Trips" id="car_pooling_show" action="car_pooling_action"/>
             <menuitem name="Trip Tags" id="trip_tag_show" action="trip_tag_action"/>
