@@ -15,6 +15,14 @@ class CarPooling(models.Model):
     destination_city=fields.Char(required=True)
     destination_address=fields.Char(required=True)
     departure_date = fields.Datetime(string="Departure Date and Time", required=True)
+    comments=fields.Text(help="The comments for the trips")
+    tag=fields.Many2many("car.pooling.tag",string="Tags")
+    is_round_trip=fields.Boolean(string="Round Trip")
+    return_date = fields.Datetime(string="Return Date and Time")
+
+    passenger_ids=fields.One2many("car.pooling.passenger","trip_id",string="Passengers")
+
+    comments_ids=fields.One2many("car.pooling.comment","trip_id",string="Comments")
     capacity=fields.Integer(string="Number of seats",required=True)
     filled_seat=fields.Integer(string="Number of filled seats",readonly=True)
     available_seat=fields.Integer(compute="_compute_available_seat", store=True, string="Available seats")
@@ -51,17 +59,6 @@ class CarPooling(models.Model):
     #         now =datetime.datetime.now()
     #         if record.departure_date < now:
     #             record.status = "unavailable"
-            
-            
-    comments=fields.Text(help="The comments for the trips")
-    tag=fields.Many2many("car.pooling.tag",string="Tags")
-    is_round_trip=fields.Boolean(string="Round Trip")
-    return_date = fields.Datetime(string="Return Date and Time")
-
-    passenger_ids=fields.One2many("car.pooling.passenger","trip_id",string="Passengers")
-
-    comments_ids=fields.One2many("car.pooling.comment","trip_id",string="Comments")
-
 
     is_current_user_driver = fields.Boolean(compute="_is_current_user_driver")
     @api.depends('driver')
@@ -156,7 +153,7 @@ class CarPooling(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_if_passenger_refused(self):
         if any(record.passenger_ids.status=="accepted" for record in self):
-                msg="There are some passengers in 'accepted' status for this trip. To delete the trip, please make sure you have refused all passenger book requests."   
+                msg="There are some passengers in 'accepted' status for this trip. To delete the trip, please make sure you have refused all accepted book requests."   
                 print("Message:",msg)
                 raise UserError(msg)
 
@@ -205,6 +202,15 @@ class CarPooling(models.Model):
          'You, as the driver, has not yet activated Car Pooling feature; thus you cannot add and share your trip. To activate Car Pooling, go to your account setting, and check volunteer box.'),
         ]        
 
+    # python constraint for return date
+    @api.constrains('return_date')
+    def _check_return_date(self):
+        for record in self:
+            if record.is_round_trip ==True:
+                if record.return_date<= record.departure_date:
+                    raise ValidationError("The return date and Time must be greater than the departure time!")
+
+
 #############################################################
 class CarPoolingTag(models.Model):
     _name="car.pooling.tag"
@@ -240,6 +246,7 @@ class CarPoolingPassenger(models.Model):
          'You can only accept a booked trip for a passenger twice!'),
         ('refuse_count_check', 'CHECK(refuse_count <= 2)',
          "You can only refuse a booked trip for a passenger twice!"),
+         ("single_booking_check",'unique(trip_id,passenger)','A passenger can only book a trip once!')
         ]
 
     def action_accept(self):
@@ -315,3 +322,7 @@ class CarPoolingPassengerComments(models.Model):
                 msg="You cannot remove somebody else's comment"   
                 print("Message:",msg)
                 raise UserError(msg)
+
+    _sql_constraints = [
+         ("single_booking_check",'unique(trip_id,passenger)','A passenger can only pose one comment!')
+        ]
