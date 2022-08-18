@@ -21,6 +21,8 @@ at [UClouvain](https://uclouvain.be), the students were asked to contribute to t
 
 It is worth saying that this repository contains the real estate app, which is a part of [Odoo Developer Training](https://www.odoo.com/documentation/15.0/developer.html). Therefore, it could also stand as a helpful source for those people wishing to complete the training. The estate directory holds the solutions up to 13th chapter of the training.
 
+## Local Development Workspace and Installation
+Please see the [Installation](./files/developer_guid.md)
 
 ## Demo
 ### [Deployment](https://youtu.be/xO2AnVVy-A4)
@@ -28,6 +30,3 @@ It is worth saying that this repository contains the real estate app, which is a
 ### [Report and Tutorial](./files/Open_source_project-Report.pdf) 
 
 ![App Image](./files/example_image.png)
-
-### Local Development Workspace and Installation
-Please see the [Installation](./files/developer_guid.md)
