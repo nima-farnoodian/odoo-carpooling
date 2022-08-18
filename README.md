@@ -22,7 +22,27 @@ at [UClouvain](https://uclouvain.be), the students were asked to contribute to t
 It is worth saying that this repository contains the real estate app, which is a part of [Odoo Developer Training](https://www.odoo.com/documentation/15.0/developer.html). Therefore, it could also stand as a helpful source for those people wishing to complete the training. The estate directory holds the solutions up to 13th chapter of the training.
 
 ## Local Development Workspace and Installation
-Please see the [Installation](./files/developer_guid.md)
+
+In order to install the app under the assumption that Odoo has been installed using Docker, the app should be
+mounted within the Odoo container.
+
+### Standing up a local workspace
+
+[See here](https://hub.docker.com/_/odoo/). to learn how to install Odoo using Docker
+
+Run the PostgreSQL server
+```
+docker run -d -e POSTGRES_USER=odoo -e POSTGRES_PASSWORD=odoo -e POSTGRES_DB=postgres --name db postgres:13
+
+#### Note: passwords could be anything you choose
+```
+Once the database server runs is complete, you should run an odoo instance and link the odoo-carpooling repo to it as follows:
+```
+docker run -p 8069:8069 -d --name odoo --link db:db -v [your director holding "odoo-carpooling" folder]/odoo-carpooling/:/mnt/extra-addons -t odoo -- -d odoo
+```
+once the app is mounted and the server runs, the carpooling app can appear on the app page and installed accordingly.
+
+![App Image](./files/installation.png)
 
 ## Demo
 ### [Deployment](https://youtu.be/xO2AnVVy-A4)
