@@ -38,7 +38,7 @@ docker run -d -e POSTGRES_USER=odoo -e POSTGRES_PASSWORD=odoo -e POSTGRES_DB=pos
 ```
 Once the database server runs is complete, you should run an odoo instance and link the odoo-carpooling repo to it as follows:
 ```
-docker run -p 8069:8069 -d --name odoo --link db:db -v [your director holding "odoo-carpooling" folder]/odoo-carpooling/:/mnt/extra-addons -t odoo -- -d odoo
+docker run -p 8069:8069 -d --name odoo --link db:db -v [your directory holding "odoo-carpooling" folder]/odoo-carpooling/:/mnt/extra-addons -t odoo -- -d odoo
 ```
 once the app is mounted and the server runs, the carpooling app can appear on the app page and installed accordingly.
 
