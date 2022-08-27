@@ -6,11 +6,11 @@
         An app to share the vehicles by Odoo users for free commuting.""",
 
     'description': """
-        The goal of this app, as agreed in the OpenWeek at UCLouvain, is to build a Carpooling app that allows the Odoo users to share their trips for free. 
+        The goal of this app, as agreed in the OpenWeek at UCLouvain, is to build a Carpooling app that allows the Odoo users to share their trips for free.
     """,
 
     'author': "Nima Farnoodian: UCLouvain",
-    'website': "http://www.uclouvain.be",
+    'website': "https://github.com/nima-farnoodian/odoo-carpooling",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
@@ -37,4 +37,6 @@
     'demo': [
         'demo/demo.xml',
     ],
+    'license': 'LGPL-3',
+    'images': ['static/description/icon.png']
 }
