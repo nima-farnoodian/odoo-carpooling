@@ -51,6 +51,7 @@ once the app is mounted and the server runs, the carpooling app can appear on th
 
 ![App Image](./files/example_image.png)
 
-## Contribution to Odoo
+## Contribution 
 
-Odoo Carpooling app has been added to a forked repository at https://github.com/nima-farnoodian/odoo under carpooling branch. The pull request has been sent on August 18, 2022, which can be found on https://github.com/odoo/odoo/pull/98431.
+Odoo Carpooling app is open to any contribution. Please feel free to fork the repo and extend it with more features.
+
