@@ -175,7 +175,8 @@ class CarPooling(models.Model):
             if self.env.user in record.passenger_ids.passenger:
                 get_passenger_trip = self.env['car.pooling.passenger'].search([('passenger_uid', '=', str(self.env.user.id)), ('trip_id_id', '=', str(record.id))])
                 if get_passenger_trip.status == "accepted":
-                    msg = "You cannot unbook the trip because the book has been accepted by the driver. Contact " + str(record.driver.name) + " at " + str(record.driver.email) + " or by " + str(record.driver.phone_number) + " to ask booking refusal."
+                    #msg = "You cannot unbook the trip because the book has been accepted by the driver. Contact " + str(record.driver.name) + " at " + str(record.driver.email) + " or by " + str(record.driver.phone_number) + " to ask booking refusal."
+                    msg = "You cannot unbook the trip because the book has been accepted by the driver. Please contact the driver to ask a refusal." 
                     raise UserError(msg)
                 get_passenger_trip.unlink()
             else:
