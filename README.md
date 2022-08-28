@@ -53,5 +53,5 @@ once the app is mounted and the server runs, the carpooling app can appear on th
 
 ## Contribution 
 
-Odoo Carpooling app is open to any contribution. Please feel free to fork the repo and extend it with more features.
+Odoo Carpooling app is open to any contribution. Please feel free to fork the repo (branch 15.0) and extend it with more features.
 
