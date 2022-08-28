@@ -38,5 +38,5 @@
         'demo/demo.xml',
     ],
     'license': 'LGPL-3',
-    'images': ['static/description/icon.png']
+    'images': ['static/description/banner.gif']
 }
